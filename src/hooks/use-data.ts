@@ -68,10 +68,10 @@ export function useProfessionals(filters?: {
         .eq("is_suspended", false);
 
       if (filters?.status && filters.status.length > 0) {
-        query = query.in("status", filters.status);
+        query = query.in("status", filters.status as any);
       }
       if (filters?.category) {
-        query = query.eq("category", filters.category);
+        query = query.eq("category", filters.category as any);
       }
       if (filters?.city) {
         query = query.ilike("city", `%${filters.city}%`);
