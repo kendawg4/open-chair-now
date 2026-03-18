@@ -1,40 +1,85 @@
 import { useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { StatusBadge } from "@/components/StatusBadge";
-import { mockProfessionals } from "@/data/mock";
-import { AvailabilityStatus } from "@/types";
+import { useMyProProfile, useUpdateStatus, useMyBookings } from "@/hooks/use-data";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Eye, Users, Calendar, Star, Bell, ChevronRight, Clock, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
-const statuses: { value: AvailabilityStatus; emoji: string }[] = [
+const statuses = [
   { value: "open-chair", emoji: "🪑" },
   { value: "available-now", emoji: "⚡" },
   { value: "last-minute", emoji: "🔥" },
   { value: "appointment-only", emoji: "📅" },
   { value: "busy", emoji: "🚫" },
   { value: "offline", emoji: "💤" },
-];
+] as const;
 
 export default function ProDashboard() {
-  const pro = mockProfessionals[0];
-  const [status, setStatus] = useState<AvailabilityStatus>(pro.status);
+  const { profile } = useAuth();
+  const { data: proProfile, isLoading } = useMyProProfile();
+  const updateStatus = useUpdateStatus();
+  const { data: bookings } = useMyBookings("pro");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4 space-y-4">
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-60 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!proProfile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-4xl">✂️</p>
+          <h1 className="font-display text-xl font-bold">Complete your pro profile</h1>
+          <p className="text-sm text-muted-foreground">Set up your professional profile to start getting discovered</p>
+          <Button asChild className="rounded-xl">
+            <Link to="/onboarding/pro">Set Up Profile</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleStatusChange = (status: string) => {
+    updateStatus.mutate({ status }, {
+      onSuccess: () => toast.success("Status updated!"),
+      onError: (e) => toast.error(e.message),
+    });
+  };
+
+  const displayName = proProfile.display_name || proProfile.business_name || proProfile.full_name;
+  const pendingBookings = (bookings || []).filter((b: any) => b.status === "pending");
+  const confirmedBookings = (bookings || []).filter((b: any) => b.status === "confirmed");
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={pro.avatar} alt="" className="h-10 w-10 rounded-full object-cover" />
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+              {proProfile.avatar_url ? (
+                <img src={proProfile.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-display font-bold text-primary">{displayName.charAt(0)}</span>
+              )}
+            </div>
             <div>
-              <p className="font-display font-bold text-sm">{pro.name}</p>
-              <StatusBadge status={status} size="sm" />
+              <p className="font-display font-bold text-sm">{displayName}</p>
+              <StatusBadge status={proProfile.status} size="sm" />
             </div>
           </div>
           <button className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-status-busy border-2 border-card" />
           </button>
         </div>
       </header>
@@ -47,10 +92,11 @@ export default function ProDashboard() {
             {statuses.map(s => (
               <button
                 key={s.value}
-                onClick={() => setStatus(s.value)}
+                onClick={() => handleStatusChange(s.value)}
+                disabled={updateStatus.isPending}
                 className={cn(
                   "flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-all",
-                  status === s.value
+                  proProfile.status === s.value
                     ? "border-primary bg-primary/10 shadow-sm"
                     : "border-border hover:border-primary/30"
                 )}
@@ -60,26 +106,23 @@ export default function ProDashboard() {
               </button>
             ))}
           </div>
-          {["open-chair", "available-now", "last-minute"].includes(status) && (
+          {["open-chair", "available-now", "last-minute"].includes(proProfile.status) && (
             <div className="mt-3 rounded-xl bg-primary/10 border border-primary/20 p-3">
-              <p className="text-xs text-primary font-medium">✅ You're visible to nearby clients! Add a promo or time window to attract more bookings.</p>
-              <Button size="sm" variant="outline" className="mt-2 h-7 text-xs rounded-full">
-                + Add promo or note
-              </Button>
+              <p className="text-xs text-primary font-medium">✅ You're visible to nearby clients!</p>
             </div>
           )}
         </section>
 
         {/* Quick Stats */}
         <section>
-          <h2 className="font-display font-bold text-base mb-3">Today's overview</h2>
+          <h2 className="font-display font-bold text-base mb-3">Overview</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: Eye, label: "Profile views", value: "47", change: "+12%" },
-              { icon: Users, label: "Followers", value: "1,820", change: "+3" },
-              { icon: Calendar, label: "Bookings today", value: "6", change: "2 pending" },
-              { icon: Star, label: "Avg. rating", value: "4.9", change: "234 reviews" },
-            ].map(({ icon: Icon, label, value, change }) => (
+              { icon: Calendar, label: "Pending bookings", value: pendingBookings.length.toString() },
+              { icon: Users, label: "Followers", value: (proProfile.follower_count || 0).toString() },
+              { icon: Star, label: "Avg. rating", value: Number(proProfile.average_rating || 0).toFixed(1) },
+              { icon: Eye, label: "Total reviews", value: (proProfile.total_reviews || 0).toString() },
+            ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="rounded-xl bg-card border border-border p-3.5">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -88,62 +131,42 @@ export default function ProDashboard() {
                 </div>
                 <p className="font-display font-bold text-xl">{value}</p>
                 <p className="text-[10px] text-muted-foreground">{label}</p>
-                <p className="text-[10px] text-primary font-medium mt-0.5">{change}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Upcoming bookings */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-base">Upcoming bookings</h2>
-            <button className="flex items-center gap-0.5 text-xs text-primary font-medium">
-              View all <ChevronRight className="h-3 w-3" />
-            </button>
-          </div>
-          <div className="space-y-2">
-            {[
-              { time: "2:30 PM", name: "James T.", service: "Skin Fade", duration: "35 min", status: "confirmed" },
-              { time: "3:15 PM", name: "Destiny R.", service: "Haircut + Beard", duration: "45 min", status: "confirmed" },
-              { time: "4:00 PM", name: "Open Slot", service: "", duration: "", status: "available" },
-            ].map((booking, i) => (
-              <div key={i} className={cn(
-                "flex items-center gap-3 rounded-xl border p-3.5",
-                booking.status === "available"
-                  ? "border-primary/30 bg-primary/5 border-dashed"
-                  : "border-border bg-card"
-              )}>
-                <div className="text-center min-w-[50px]">
-                  <p className="font-display font-bold text-sm">{booking.time}</p>
+        {/* Pending Bookings */}
+        {pendingBookings.length > 0 && (
+          <section>
+            <h2 className="font-display font-bold text-base mb-3">Pending Requests</h2>
+            <div className="space-y-2">
+              {pendingBookings.slice(0, 5).map((booking: any) => (
+                <div key={booking.id} className="rounded-xl border border-border bg-card p-3.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-sm">{booking.profiles?.full_name || "Client"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {booking.services?.service_name || "Service"} · {booking.booking_date}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-medium text-accent bg-accent/10 rounded-full px-2 py-0.5">Pending</span>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">{booking.name}</p>
-                  {booking.service && (
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> {booking.service} · {booking.duration}
-                    </p>
-                  )}
-                </div>
-                {booking.status === "available" ? (
-                  <Button size="sm" className="h-7 text-xs rounded-full">Fill slot</Button>
-                ) : (
-                  <span className="text-[10px] font-medium text-primary bg-primary/10 rounded-full px-2 py-0.5">Confirmed</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Quick actions */}
         <section>
           <h2 className="font-display font-bold text-base mb-3">Quick actions</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Post update", desc: "Share work or promo" },
+              { label: "Edit profile", desc: "Update your info" },
               { label: "Edit services", desc: "Prices & offerings" },
-              { label: "Portfolio", desc: "Add photos/videos" },
-              { label: "Insights", desc: "Views & analytics" },
+              { label: "Portfolio", desc: "Add photos" },
+              { label: "View as client", desc: "See your public profile" },
             ].map(({ label, desc }) => (
               <button key={label} className="text-left rounded-xl bg-card border border-border p-3.5 hover:border-primary/30 transition-colors">
                 <p className="font-semibold text-sm">{label}</p>
