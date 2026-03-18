@@ -111,10 +111,10 @@ export function useProfessionalById(id: string | undefined) {
       return {
         ...data,
         full_name: (data as any).profiles?.full_name || "",
-        display_name: (data as any).profiles?.display_name,
-        avatar_url: (data as any).profiles?.avatar_url,
-        bio: (data as any).profiles?.bio,
-      } as ProWithProfile;
+        display_name: (data as any).profiles?.display_name || null,
+        avatar_url: (data as any).profiles?.avatar_url || null,
+        bio: (data as any).profiles?.bio || null,
+      } as unknown as ProWithProfile;
     },
     enabled: !!id,
   });
