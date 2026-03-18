@@ -2,32 +2,36 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProCard } from "@/components/ProCard";
 import { FeedCard } from "@/components/FeedCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { mockProfessionals, mockFeed } from "@/data/mock";
+import { useProfessionals, useFeed, useRealtimeProfessionals } from "@/hooks/use-data";
+import { useAuth } from "@/lib/auth-context";
 import { Link } from "react-router-dom";
 import { MapPin, Bell, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ClientHome() {
-  const availableNow = mockProfessionals.filter(p =>
+  const { profile } = useAuth();
+  const { data: professionals, isLoading: prosLoading } = useProfessionals();
+  const { data: feed, isLoading: feedLoading } = useFeed();
+  useRealtimeProfessionals();
+
+  const availableNow = (professionals || []).filter(p =>
     ["open-chair", "available-now", "last-minute"].includes(p.status)
   );
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-display text-lg font-bold">Open<span className="text-primary">Chair</span></p>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
-              <span>Brooklyn, NY</span>
+              <span>{profile?.city || "Nearby"}</span>
             </div>
           </div>
-          <button className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+          <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-status-busy border-2 border-card" />
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -43,13 +47,24 @@ export default function ClientHome() {
               See all <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {availableNow.map(pro => (
-              <div key={pro.id} className="w-[280px] shrink-0">
-                <ProCard pro={pro} />
-              </div>
-            ))}
-          </div>
+          {prosLoading ? (
+            <div className="flex gap-3 overflow-hidden">
+              {[1,2].map(i => <Skeleton key={i} className="w-[280px] h-[240px] shrink-0 rounded-2xl" />)}
+            </div>
+          ) : availableNow.length === 0 ? (
+            <div className="text-center py-8 bg-card rounded-2xl border border-border">
+              <p className="text-2xl mb-2">😴</p>
+              <p className="text-sm text-muted-foreground">No pros available right now</p>
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              {availableNow.map(pro => (
+                <div key={pro.id} className="w-[280px] shrink-0">
+                  <ProCard pro={pro} />
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Quick categories */}
@@ -57,9 +72,9 @@ export default function ClientHome() {
           <h2 className="font-display font-bold text-base mb-3">Browse by category</h2>
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             {["✂️ Barber", "💇‍♀️ Stylist", "🧶 Braider", "💅 Nails", "🧖‍♀️ Esthetician", "👁️ Lashes", "💄 Makeup", "🎨 Tattoo"].map(cat => (
-              <button key={cat} className="shrink-0 rounded-full bg-secondary px-4 py-2 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors">
+              <Link key={cat} to={`/search?q=${cat.split(" ")[1]}`} className="shrink-0 rounded-full bg-secondary px-4 py-2 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors">
                 {cat}
-              </button>
+              </Link>
             ))}
           </div>
         </section>
@@ -81,11 +96,22 @@ export default function ClientHome() {
         {/* Feed */}
         <section>
           <h2 className="font-display font-bold text-base mb-3">Latest updates</h2>
-          <div className="space-y-4">
-            {mockFeed.map(post => (
-              <FeedCard key={post.id} post={post} />
-            ))}
-          </div>
+          {feedLoading ? (
+            <div className="space-y-4">
+              {[1,2].map(i => <Skeleton key={i} className="h-40 rounded-2xl" />)}
+            </div>
+          ) : (feed || []).length === 0 ? (
+            <div className="text-center py-8 bg-card rounded-2xl border border-border">
+              <p className="text-2xl mb-2">📝</p>
+              <p className="text-sm text-muted-foreground">No posts yet</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(feed || []).map(post => (
+                <FeedCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
         </section>
       </div>
 

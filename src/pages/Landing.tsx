@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Link } from "react-router-dom";
 import { MapPin, Zap, Star, Clock, Scissors, Users, TrendingUp, Shield } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth-context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -10,21 +11,32 @@ const fadeUp = {
 };
 
 export default function Landing() {
+  const { user, role } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 glass">
         <div className="container flex items-center justify-between h-14 px-4">
           <Link to="/" className="font-display text-xl font-bold tracking-tight">
             Open<span className="text-primary">Chair</span>
           </Link>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">Log in</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link to="/home">Get Started</Link>
-            </Button>
+            {user ? (
+              <Button size="sm" asChild>
+                <Link to={role === "professional" ? "/pro/dashboard" : "/home"}>
+                  Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">Log in</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/signup">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -32,12 +44,7 @@ export default function Landing() {
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pt-16 pb-20">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <motion.div
-          className="relative mx-auto max-w-lg text-center"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-        >
+        <motion.div className="relative mx-auto max-w-lg text-center" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
           <motion.div variants={fadeUp} custom={0} className="mb-4 inline-flex">
             <StatusBadge status="open-chair" size="md" pulse />
           </motion.div>
@@ -49,49 +56,16 @@ export default function Landing() {
           </motion.p>
           <motion.div variants={fadeUp} custom={3} className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button size="lg" className="rounded-full text-base px-8" asChild>
-              <Link to="/home">
-                <MapPin className="h-5 w-5 mr-1" />
-                Find a Pro
+              <Link to={user ? "/home" : "/signup"}>
+                <MapPin className="h-5 w-5 mr-1" /> Find a Pro
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="rounded-full text-base px-8" asChild>
-              <Link to="/pro/dashboard">
-                <Scissors className="h-5 w-5 mr-1" />
-                Join as a Pro
+              <Link to={user ? "/pro/dashboard" : "/signup"}>
+                <Scissors className="h-5 w-5 mr-1" /> Join as a Pro
               </Link>
             </Button>
           </motion.div>
-        </motion.div>
-
-        {/* Mock status cards */}
-        <motion.div
-          className="relative mt-12 mx-auto max-w-sm flex flex-col gap-3"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.15, delayChildren: 0.5 } } }}
-        >
-          {[
-            { name: "Marcus J.", cat: "Barber · Brooklyn", status: "open-chair" as const, note: "Walk-ins welcome — open 2 hrs", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
-            { name: "Aisha W.", cat: "Braider · Atlanta", status: "last-minute" as const, note: "Cancellation at 2:15 PM — 10% off", img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face" },
-            { name: "Tony R.", cat: "Barber · Brooklyn", status: "available-now" as const, note: "Ready now — no wait", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face" },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              variants={fadeUp}
-              custom={i}
-              className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-sm"
-            >
-              <img src={item.img} alt="" className="h-12 w-12 rounded-full object-cover" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-semibold text-sm">{item.name}</span>
-                  <StatusBadge status={item.status} size="sm" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.cat}</p>
-                <p className="text-xs text-primary font-medium mt-0.5">{item.note}</p>
-              </div>
-            </motion.div>
-          ))}
         </motion.div>
       </section>
 
@@ -142,7 +116,7 @@ export default function Landing() {
             ))}
           </div>
           <Button className="mt-8 rounded-full px-8" asChild>
-            <Link to="/pro/dashboard">Join as a Professional</Link>
+            <Link to={user ? "/pro/dashboard" : "/signup"}>Join as a Professional</Link>
           </Button>
         </div>
       </section>
@@ -151,6 +125,11 @@ export default function Landing() {
       <footer className="border-t border-border px-4 py-8 text-center">
         <p className="font-display text-lg font-bold">Open<span className="text-primary">Chair</span></p>
         <p className="text-xs text-muted-foreground mt-1">Real-time booking for barbers and beauty pros</p>
+        <div className="mt-4 flex justify-center gap-4 text-xs text-muted-foreground">
+          <Link to="/terms" className="hover:text-foreground">Terms</Link>
+          <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+          <Link to="/contact" className="hover:text-foreground">Contact</Link>
+        </div>
         <p className="text-xs text-muted-foreground mt-4">© 2026 OpenChair. All rights reserved.</p>
       </footer>
     </div>

@@ -1,17 +1,31 @@
 import { BottomNav } from "@/components/BottomNav";
 import { ProCard } from "@/components/ProCard";
-import { mockProfessionals } from "@/data/mock";
+import { useProfessionals } from "@/hooks/use-data";
 import { useState } from "react";
 import { Search as SearchIcon, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Search() {
-  const [query, setQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
+  const { data: professionals, isLoading } = useProfessionals({
+    search: query || undefined,
+  });
+
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setQuery(q);
+  }, [searchParams]);
+
   const results = query
-    ? mockProfessionals.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.specialties.some(s => s.toLowerCase().includes(query.toLowerCase())) ||
-        p.category.includes(query.toLowerCase())
+    ? (professionals || []).filter(p =>
+        p.full_name.toLowerCase().includes(query.toLowerCase()) ||
+        (p.specialties || []).some(s => s.toLowerCase().includes(query.toLowerCase())) ||
+        p.category.includes(query.toLowerCase()) ||
+        (p.city || "").toLowerCase().includes(query.toLowerCase())
       )
     : [];
 
@@ -34,23 +48,25 @@ export default function Search() {
         </div>
       </header>
       <div className="px-4 pt-4 space-y-4">
-        {!query && (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1,2,3].map(i => <Skeleton key={i} className="h-60 rounded-2xl" />)}
+          </div>
+        ) : !query ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🔍</p>
             <p className="font-display font-semibold text-sm">Search for professionals</p>
             <p className="text-xs text-muted-foreground mt-1">Try "fade", "braids", "nails", or a name</p>
           </div>
-        )}
-        {query && results.length === 0 && (
+        ) : results.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🤷</p>
             <p className="font-display font-semibold text-sm">No results for "{query}"</p>
             <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
           </div>
+        ) : (
+          results.map(pro => <ProCard key={pro.id} pro={pro} />)
         )}
-        {results.map(pro => (
-          <ProCard key={pro.id} pro={pro} />
-        ))}
       </div>
       <BottomNav role="client" />
     </div>

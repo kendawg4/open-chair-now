@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
-import { AvailabilityStatus } from "@/types";
-import { statusLabels } from "@/data/mock";
+import { statusLabels } from "@/lib/constants";
 
-const statusStyles: Record<AvailabilityStatus, string> = {
+const statusStyles: Record<string, string> = {
   "open-chair": "bg-status-open-chair text-primary-foreground status-glow-green",
   "available-now": "bg-status-available text-primary-foreground status-glow-green",
   "last-minute": "bg-status-last-minute text-accent-foreground status-glow-yellow",
@@ -12,7 +11,7 @@ const statusStyles: Record<AvailabilityStatus, string> = {
 };
 
 interface StatusBadgeProps {
-  status: AvailabilityStatus;
+  status: string;
   size?: "sm" | "md";
   pulse?: boolean;
   className?: string;
@@ -26,7 +25,7 @@ export function StatusBadge({ status, size = "sm", pulse, className }: StatusBad
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-semibold whitespace-nowrap",
         size === "sm" ? "px-2.5 py-0.5 text-[10px]" : "px-3 py-1 text-xs",
-        statusStyles[status],
+        statusStyles[status] || "bg-muted text-muted-foreground",
         (pulse || isAvailable) && "animate-pulse-status",
         className
       )}
@@ -38,7 +37,7 @@ export function StatusBadge({ status, size = "sm", pulse, className }: StatusBad
           isAvailable ? "bg-primary-foreground" : "bg-current opacity-50"
         )}
       />
-      {statusLabels[status]}
+      {statusLabels[status] || status}
     </span>
   );
 }

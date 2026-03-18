@@ -1,11 +1,12 @@
 import { BottomNav } from "@/components/BottomNav";
 import { ProCard } from "@/components/ProCard";
-import { mockProfessionals } from "@/data/mock";
+import { useMyFavorites } from "@/hooks/use-data";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Favorites() {
-  const favs = mockProfessionals.slice(0, 3);
+  const { data: favorites, isLoading } = useMyFavorites();
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -16,9 +17,21 @@ export default function Favorites() {
         </div>
       </header>
       <div className="px-4 pt-4 space-y-4">
-        {favs.map(pro => (
-          <ProCard key={pro.id} pro={pro} />
-        ))}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1,2].map(i => <Skeleton key={i} className="h-60 rounded-2xl" />)}
+          </div>
+        ) : !favorites || favorites.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-4xl mb-3">💜</p>
+            <p className="font-display font-semibold text-sm">No saved professionals yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Tap the heart on any pro to save them</p>
+          </div>
+        ) : (
+          favorites.map(fav => (
+            <ProCard key={fav.id} pro={fav.pro} />
+          ))
+        )}
       </div>
       <BottomNav role="client" />
     </div>
