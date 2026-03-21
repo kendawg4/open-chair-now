@@ -1,7 +1,7 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LogOut, Bell, Shield, HelpCircle, ChevronRight, User, Moon } from "lucide-react";
+import { ArrowLeft, LogOut, Bell, Shield, HelpCircle, ChevronRight, User, FileText, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Settings() {
@@ -16,8 +16,10 @@ export default function Settings() {
   const items = [
     { icon: User, label: "Edit Profile", to: role === "professional" ? "/pro/profile-edit" : "/profile" },
     { icon: Bell, label: "Notification Preferences", to: "/notifications" },
-    { icon: Shield, label: "Privacy & Security", to: "#" },
-    { icon: HelpCircle, label: "Help & Support", to: "#" },
+    { icon: Shield, label: "Privacy Policy", to: "/privacy" },
+    { icon: HelpCircle, label: "Help Center", to: "/help" },
+    { icon: FileText, label: "Terms of Service", to: "/terms" },
+    { icon: BookOpen, label: "Community Guidelines", to: "/community-guidelines" },
   ];
 
   return (

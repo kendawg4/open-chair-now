@@ -8,6 +8,11 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import ProWaitlist from "./pages/waitlist/ProWaitlist";
 import ClientWaitlist from "./pages/waitlist/ClientWaitlist";
+import Terms from "./pages/legal/Terms";
+import Privacy from "./pages/legal/Privacy";
+import Contact from "./pages/legal/Contact";
+import HelpCenter from "./pages/legal/HelpCenter";
+import CommunityGuidelines from "./pages/legal/CommunityGuidelines";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -50,6 +55,11 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/waitlist/pro" element={<ProWaitlist />} />
             <Route path="/waitlist/client" element={<ClientWaitlist />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelines />} />
 
             {/* Onboarding */}
             <Route path="/onboarding/role" element={<RoleSelect />} />
