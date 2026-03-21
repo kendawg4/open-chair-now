@@ -147,9 +147,11 @@ export default function Landing() {
       <footer className="border-t border-border px-4 py-8 text-center">
         <p className="font-display text-lg font-bold">Open<span className="text-primary">Chair</span></p>
         <p className="text-xs text-muted-foreground mt-1">Real-time booking for barbers and beauty pros</p>
-        <div className="mt-4 flex justify-center gap-4 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <Link to="/terms" className="hover:text-foreground">Terms</Link>
           <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+          <Link to="/community-guidelines" className="hover:text-foreground">Guidelines</Link>
+          <Link to="/help" className="hover:text-foreground">Help</Link>
           <Link to="/contact" className="hover:text-foreground">Contact</Link>
         </div>
         <p className="text-xs text-muted-foreground mt-4">© 2026 OpenChair. All rights reserved.</p>

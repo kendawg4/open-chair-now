@@ -16,8 +16,10 @@ export default function Settings() {
   const items = [
     { icon: User, label: "Edit Profile", to: role === "professional" ? "/pro/profile-edit" : "/profile" },
     { icon: Bell, label: "Notification Preferences", to: "/notifications" },
-    { icon: Shield, label: "Privacy & Security", to: "#" },
-    { icon: HelpCircle, label: "Help & Support", to: "#" },
+    { icon: Shield, label: "Privacy Policy", to: "/privacy" },
+    { icon: HelpCircle, label: "Help Center", to: "/help" },
+    { icon: FileText, label: "Terms of Service", to: "/terms" },
+    { icon: BookOpen, label: "Community Guidelines", to: "/community-guidelines" },
   ];
 
   return (

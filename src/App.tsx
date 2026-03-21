@@ -55,6 +55,11 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/waitlist/pro" element={<ProWaitlist />} />
             <Route path="/waitlist/client" element={<ClientWaitlist />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/help" element={<HelpCenter />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelines />} />
 
             {/* Onboarding */}
             <Route path="/onboarding/role" element={<RoleSelect />} />
