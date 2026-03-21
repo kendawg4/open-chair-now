@@ -48,6 +48,8 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/waitlist/pro" element={<ProWaitlist />} />
+            <Route path="/waitlist/client" element={<ClientWaitlist />} />
 
             {/* Onboarding */}
             <Route path="/onboarding/role" element={<RoleSelect />} />
