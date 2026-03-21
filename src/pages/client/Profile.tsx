@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,6 +8,13 @@ import { useAuth } from "@/lib/auth-context";
 export default function ClientProfile() {
   const { profile, role, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect professionals to their dashboard
+  useEffect(() => {
+    if (role === "professional" || role === "shop_owner") {
+      navigate("/pro/dashboard", { replace: true });
+    }
+  }, [role, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
