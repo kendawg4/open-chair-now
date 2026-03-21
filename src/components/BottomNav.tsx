@@ -1,6 +1,7 @@
 import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Eye, Scissors } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
 
 const clientNav = [
   { to: "/home", icon: Home, label: "Home" },
@@ -22,15 +23,19 @@ interface BottomNavProps {
   role?: "client" | "pro";
 }
 
-export function BottomNav({ role = "client" }: BottomNavProps) {
+export function BottomNav({ role: roleProp }: BottomNavProps) {
   const location = useLocation();
-  const nav = role === "pro" ? proNav : clientNav;
+  const { role: authRole } = useAuth();
+
+  // Auto-detect role from auth context if not explicitly passed
+  const effectiveRole = roleProp ?? (authRole === "professional" || authRole === "shop_owner" ? "pro" : "client");
+  const nav = effectiveRole === "pro" ? proNav : clientNav;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-2">
         {nav.map(({ to, icon: Icon, label }) => {
-          const active = location.pathname === to || (to === "/pro/preview" && location.pathname.startsWith("/pro/") && !location.pathname.startsWith("/pro/dashboard") && !location.pathname.startsWith("/pro/profile-edit") && !location.pathname.startsWith("/pro/bookings") && !location.pathname.startsWith("/pro/services") && !location.pathname.startsWith("/pro/portfolio"));
+          const active = location.pathname === to || location.pathname.startsWith(to + "/");
           return (
             <Link
               key={to}

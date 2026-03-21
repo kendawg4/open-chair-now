@@ -8,6 +8,13 @@ export default function ClientProfile() {
   const { profile, role, signOut } = useAuth();
   const navigate = useNavigate();
 
+  // Redirect professionals to their dashboard
+  useEffect(() => {
+    if (role === "professional" || role === "shop_owner") {
+      navigate("/pro/dashboard", { replace: true });
+    }
+  }, [role, navigate]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
