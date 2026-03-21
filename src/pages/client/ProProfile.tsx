@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -7,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Star, MapPin, Heart, Share2, Clock, MessageCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { BookingSheet } from "@/components/BookingSheet";
 
 export default function ProProfile() {
   const { id } = useParams();
