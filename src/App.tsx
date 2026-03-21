@@ -35,6 +35,7 @@ import ProPortfolio from "./pages/pro/Portfolio";
 import ProPreview from "./pages/pro/Preview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/admin/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
