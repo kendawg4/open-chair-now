@@ -35,6 +35,7 @@ import ProPortfolio from "./pages/pro/Portfolio";
 import ProPreview from "./pages/pro/Preview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/admin/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -86,6 +87,9 @@ const App = () => (
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
+            {/* Admin */}
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
