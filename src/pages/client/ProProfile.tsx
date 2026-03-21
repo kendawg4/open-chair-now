@@ -225,11 +225,19 @@ export default function ProProfile() {
           <Button variant="outline" size="lg" className="rounded-full flex-shrink-0">
             <MessageCircle className="h-5 w-5" />
           </Button>
-          <Button size="lg" className="rounded-full flex-1 text-base font-semibold">
+          <Button size="lg" className="rounded-full flex-1 text-base font-semibold" onClick={() => setBookingOpen(true)}>
             {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
           </Button>
         </div>
       </div>
+
+      <BookingSheet
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        proProfileId={pro.id}
+        proName={displayName}
+        services={(pro.services || []) as any}
+      />
     </div>
   );
 }
