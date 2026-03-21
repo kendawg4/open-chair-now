@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -7,9 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Star, MapPin, Heart, Share2, Clock, MessageCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { BookingSheet } from "@/components/BookingSheet";
 
 export default function ProProfile() {
   const { id } = useParams();
+  const [bookingOpen, setBookingOpen] = useState(false);
   const { user } = useAuth();
   const { data: pro, isLoading } = useProfessionalById(id);
   const { data: reviews } = useReviewsForPro(id);
@@ -222,11 +225,19 @@ export default function ProProfile() {
           <Button variant="outline" size="lg" className="rounded-full flex-shrink-0">
             <MessageCircle className="h-5 w-5" />
           </Button>
-          <Button size="lg" className="rounded-full flex-1 text-base font-semibold">
+          <Button size="lg" className="rounded-full flex-1 text-base font-semibold" onClick={() => setBookingOpen(true)}>
             {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
           </Button>
         </div>
       </div>
+
+      <BookingSheet
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        proProfileId={pro.id}
+        proName={displayName}
+        services={(pro.services || []) as any}
+      />
     </div>
   );
 }

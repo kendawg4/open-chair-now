@@ -45,7 +45,7 @@ export default function ClientProfile() {
 
         <div className="space-y-1">
           {[
-            { icon: Calendar, label: "My Bookings", to: "/home" },
+            { icon: Calendar, label: "My Bookings", to: "/bookings" },
             { icon: Heart, label: "Saved Professionals", to: "/favorites" },
             { icon: Star, label: "My Reviews", to: "/home" },
             { icon: Bell, label: "Notifications", to: "/notifications" },
