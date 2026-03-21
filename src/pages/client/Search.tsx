@@ -61,19 +61,39 @@ export default function Search() {
       list = list.filter(p => p.accepts_walk_ins === filters.walkIns);
     }
 
-    // Distance filter
+    // Distance filter — strict logic
     if (filters.distanceMiles !== null && filters.distanceMiles > 0) {
       list = list.filter((p) => {
-        // If we have both user coords and pro coords, do real distance
+        // Best case: both user and pro have coordinates — use real distance
         if (userCoords && p.latitude && p.longitude) {
           return haversineDistance(userCoords.latitude, userCoords.longitude, p.latitude, p.longitude) <= filters.distanceMiles!;
         }
-        // Fallback: match by city if available
-        if (profile?.city && p.city) {
-          return profile.city.trim().toLowerCase() === p.city.trim().toLowerCase();
+        // Fallback: no user coords but pro has coords — cannot calculate distance, exclude
+        // This prevents showing Brooklyn pros to Florida users
+        if (!userCoords && p.latitude && p.longitude) {
+          // If user has a city in profile, match city+state strictly
+          if (profile?.city && p.city && profile?.state && p.state) {
+            return (
+              profile.city.trim().toLowerCase() === p.city.trim().toLowerCase() &&
+              profile.state.trim().toLowerCase() === p.state.trim().toLowerCase()
+            );
+          }
+          if (profile?.city && p.city) {
+            return profile.city.trim().toLowerCase() === p.city.trim().toLowerCase();
+          }
+          // No location data to compare — exclude from distance-filtered results
+          return false;
         }
-        // If no location data at all, include the result (don't exclude unfairly)
-        return true;
+        // Pro has no coordinates at all — can only match by city+state
+        if (profile?.city && p.city) {
+          const cityMatch = profile.city.trim().toLowerCase() === p.city.trim().toLowerCase();
+          if (profile?.state && p.state) {
+            return cityMatch && profile.state.trim().toLowerCase() === p.state.trim().toLowerCase();
+          }
+          return cityMatch;
+        }
+        // No location data available on either side — exclude
+        return false;
       });
     }
 
@@ -140,7 +160,10 @@ export default function Search() {
             <p className="text-xs text-muted-foreground">
               {results.length} result{results.length !== 1 ? "s" : ""}
               {filters.distanceMiles !== null && !userCoords && (
-                <span className="ml-1">· Distance filtered by city (enable location for precise results)</span>
+                <span className="ml-1">· Filtered by city/state (enable location for precise distance)</span>
+              )}
+              {filters.distanceMiles !== null && userCoords && (
+                <span className="ml-1">· Within {filters.distanceMiles} mi</span>
               )}
             </p>
             {results.map(pro => <ProCard key={pro.id} pro={pro} />)}

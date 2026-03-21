@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { geocodeAddress } from "@/hooks/use-geocode";
 import { statusLabels, categoryLabels } from "@/lib/constants";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -89,8 +90,12 @@ export default function ProfileEdit() {
 
   const handleSaveProfile = async () => {
     if (!proProfile || !profile) return;
+    if (!city.trim()) { toast.error("City is required"); return; }
     setSaving(true);
     try {
+      // Geocode the address
+      const coords = await geocodeAddress(address || null, city, stateName || null);
+
       const [profileRes, proRes] = await Promise.all([
         supabase.from("profiles").update({
           display_name: displayName || null,
@@ -104,6 +109,8 @@ export default function ProfileEdit() {
           address: address || null,
           city: city || null,
           state: stateName || null,
+          latitude: coords?.latitude ?? proProfile.latitude,
+          longitude: coords?.longitude ?? proProfile.longitude,
           instagram_url: instagram || null,
           tiktok_url: tiktok || null,
           website_url: website || null,
@@ -116,7 +123,7 @@ export default function ProfileEdit() {
       await refreshProfile();
       queryClient.invalidateQueries({ queryKey: ["myProProfile"] });
       queryClient.invalidateQueries({ queryKey: ["professionals"] });
-      toast.success("Profile saved!");
+      toast.success(coords ? "Profile saved with updated location!" : "Profile saved!");
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
     }
