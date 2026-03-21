@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -11,10 +11,9 @@ const clientNav = [
 ];
 
 const proNav = [
-  { to: "/pro/dashboard", icon: Home, label: "Dashboard" },
-  { to: "/pro/portfolio", icon: MapPin, label: "Portfolio" },
-  { to: "/pro/bookings", icon: Search, label: "Bookings" },
+  { to: "/pro/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/pro/profile-edit", icon: User, label: "Profile" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 interface BottomNavProps {

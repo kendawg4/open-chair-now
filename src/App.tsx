@@ -20,6 +20,9 @@ import Favorites from "./pages/client/Favorites";
 import ClientProfile from "./pages/client/Profile";
 import ProProfile from "./pages/client/ProProfile";
 import ProDashboard from "./pages/pro/Dashboard";
+import ProfileEdit from "./pages/pro/ProfileEdit";
+import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +57,11 @@ const App = () => (
 
             {/* Professional */}
             <Route path="/pro/dashboard" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProDashboard /></ProtectedRoute>} />
+            <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProfileEdit /></ProtectedRoute>} />
+
+            {/* Shared */}
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

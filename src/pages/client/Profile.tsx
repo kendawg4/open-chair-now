@@ -22,9 +22,9 @@ export default function ClientProfile() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="font-display font-bold text-lg">Profile</h1>
-          <button className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
+          <Link to="/settings" className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
             <Settings className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -48,7 +48,7 @@ export default function ClientProfile() {
             { icon: Calendar, label: "My Bookings", to: "/home" },
             { icon: Heart, label: "Saved Professionals", to: "/favorites" },
             { icon: Star, label: "My Reviews", to: "/home" },
-            { icon: Bell, label: "Notification Settings", to: "/home" },
+            { icon: Bell, label: "Notifications", to: "/notifications" },
           ].map(({ icon: Icon, label, to }) => (
             <Link key={label} to={to} className="flex items-center gap-3 rounded-xl p-3 hover:bg-secondary transition-colors">
               <Icon className="h-5 w-5 text-muted-foreground" />
