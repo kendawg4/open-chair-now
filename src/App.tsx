@@ -19,6 +19,7 @@ import Search from "./pages/client/Search";
 import Favorites from "./pages/client/Favorites";
 import ClientProfile from "./pages/client/Profile";
 import ProProfile from "./pages/client/ProProfile";
+import ClientBookings from "./pages/client/Bookings";
 import ProDashboard from "./pages/pro/Dashboard";
 import ProfileEdit from "./pages/pro/ProfileEdit";
 import ProBookings from "./pages/pro/Bookings";
