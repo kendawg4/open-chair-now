@@ -16,8 +16,14 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const passwordsMatch = confirmPassword.length === 0 || password === confirmPassword;
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fullName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return;
@@ -31,7 +37,7 @@ export default function Signup() {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName.trim() },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -115,10 +121,13 @@ export default function Signup() {
                 onChange={e => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                className="rounded-xl"
+                className={`rounded-xl ${!passwordsMatch ? "border-destructive focus-visible:ring-destructive" : ""}`}
               />
+              {!passwordsMatch && (
+                <p className="text-xs text-destructive">Passwords do not match</p>
+              )}
             </div>
-            <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+            <Button type="submit" className="w-full rounded-xl h-11" disabled={loading || !passwordsMatch}>
               {loading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
