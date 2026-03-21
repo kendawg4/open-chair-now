@@ -31,6 +31,7 @@ export interface ProWithProfile {
   total_reviews: number | null;
   follower_count: number | null;
   status: string;
+  status_expires_at: string | null;
   status_note: string | null;
   status_promo: string | null;
   accepts_walk_ins: boolean | null;
