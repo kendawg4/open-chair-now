@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useMyBookings, useUpdateBookingStatus } from "@/hooks/use-data";
-import { ArrowLeft, Calendar, Clock, Check, X, CheckCircle2, Ban } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,8 @@ const statusColors: Record<string, string> = {
   no_show: "bg-destructive/15 text-destructive",
 };
 
-export default function ProBookings() {
-  const { data: bookings, isLoading } = useMyBookings("pro");
+export default function ClientBookings() {
+  const { data: bookings, isLoading } = useMyBookings("client");
   const updateStatus = useUpdateBookingStatus();
 
   const pending = bookings?.filter((b: any) => b.status === "pending") || [];
@@ -26,28 +26,28 @@ export default function ProBookings() {
   const completed = bookings?.filter((b: any) => b.status === "completed") || [];
   const other = bookings?.filter((b: any) => ["cancelled", "declined", "no_show"].includes(b.status)) || [];
 
-  const handleAction = async (id: string, status: string, label: string) => {
+  const handleCancel = async (id: string) => {
     try {
-      await updateStatus.mutateAsync({ id, status });
-      toast.success(`Booking ${label}`);
-    } catch { toast.error(`Failed to ${label.toLowerCase()}`); }
+      await updateStatus.mutateAsync({ id, status: "cancelled" });
+      toast.success("Booking cancelled");
+    } catch { toast.error("Failed to cancel"); }
   };
 
   const BookingCard = ({ booking }: { booking: any }) => {
-    const clientName = booking.profiles?.full_name || "Client";
+    const proName = booking.professional_profiles?.profiles?.full_name || "Professional";
     return (
       <div className="rounded-xl border border-border bg-card p-4 space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-              {booking.profiles?.avatar_url ? (
-                <img src={booking.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+              {booking.professional_profiles?.profiles?.avatar_url ? (
+                <img src={booking.professional_profiles.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-xs font-bold text-primary">{clientName.charAt(0)}</span>
+                <span className="text-xs font-bold text-primary">{proName.charAt(0)}</span>
               )}
             </div>
             <div>
-              <p className="font-semibold text-sm">{clientName}</p>
+              <p className="font-semibold text-sm">{proName}</p>
               <p className="text-xs text-muted-foreground">{booking.services?.service_name || "Service"}</p>
             </div>
           </div>
@@ -61,26 +61,10 @@ export default function ProBookings() {
           {booking.total_price_estimate && <span className="font-medium text-foreground">${Number(booking.total_price_estimate)}</span>}
         </div>
         {booking.notes && <p className="text-xs text-muted-foreground">{booking.notes}</p>}
-
         {booking.status === "pending" && (
-          <div className="flex gap-2 pt-1">
-            <Button size="sm" className="rounded-full text-xs gap-1 flex-1" onClick={() => handleAction(booking.id, "confirmed", "accepted")} disabled={updateStatus.isPending}>
-              <Check className="h-3 w-3" /> Accept
-            </Button>
-            <Button size="sm" variant="outline" className="rounded-full text-xs gap-1 flex-1" onClick={() => handleAction(booking.id, "declined", "declined")} disabled={updateStatus.isPending}>
-              <X className="h-3 w-3" /> Decline
-            </Button>
-          </div>
-        )}
-        {booking.status === "confirmed" && (
-          <div className="flex gap-2 pt-1">
-            <Button size="sm" className="rounded-full text-xs gap-1 flex-1" onClick={() => handleAction(booking.id, "completed", "completed")} disabled={updateStatus.isPending}>
-              <CheckCircle2 className="h-3 w-3" /> Complete
-            </Button>
-            <Button size="sm" variant="outline" className="rounded-full text-xs gap-1 flex-1" onClick={() => handleAction(booking.id, "cancelled", "cancelled")} disabled={updateStatus.isPending}>
-              <Ban className="h-3 w-3" /> Cancel
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" className="rounded-full text-xs mt-1" onClick={() => handleCancel(booking.id)} disabled={updateStatus.isPending}>
+            Cancel Request
+          </Button>
         )}
       </div>
     );
@@ -97,8 +81,8 @@ export default function ProBookings() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link to="/pro/dashboard"><ArrowLeft className="h-5 w-5" /></Link>
-          <h1 className="font-display font-bold text-lg">Bookings</h1>
+          <Link to="/profile"><ArrowLeft className="h-5 w-5" /></Link>
+          <h1 className="font-display font-bold text-lg">My Bookings</h1>
         </div>
       </header>
 
@@ -106,23 +90,18 @@ export default function ProBookings() {
         {isLoading ? (
           <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
         ) : (
-          <Tabs defaultValue="pending" className="w-full">
-            <TabsList className="w-full grid grid-cols-4 mb-4">
-              <TabsTrigger value="pending" className="text-xs">Pending ({pending.length})</TabsTrigger>
-              <TabsTrigger value="confirmed" className="text-xs">Active ({confirmed.length})</TabsTrigger>
-              <TabsTrigger value="completed" className="text-xs">Done ({completed.length})</TabsTrigger>
-              <TabsTrigger value="other" className="text-xs">Other ({other.length})</TabsTrigger>
+          <Tabs defaultValue="upcoming" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="upcoming">Upcoming ({pending.length + confirmed.length})</TabsTrigger>
+              <TabsTrigger value="completed">Done ({completed.length})</TabsTrigger>
+              <TabsTrigger value="other">Other ({other.length})</TabsTrigger>
             </TabsList>
-            <TabsContent value="pending" className="space-y-3">
-              {pending.length === 0 ? <EmptyState message="No pending requests" /> :
-                pending.map((b: any) => <BookingCard key={b.id} booking={b} />)}
-            </TabsContent>
-            <TabsContent value="confirmed" className="space-y-3">
-              {confirmed.length === 0 ? <EmptyState message="No active bookings" /> :
-                confirmed.map((b: any) => <BookingCard key={b.id} booking={b} />)}
+            <TabsContent value="upcoming" className="space-y-3">
+              {[...pending, ...confirmed].length === 0 ? <EmptyState message="No upcoming bookings" /> :
+                [...pending, ...confirmed].map((b: any) => <BookingCard key={b.id} booking={b} />)}
             </TabsContent>
             <TabsContent value="completed" className="space-y-3">
-              {completed.length === 0 ? <EmptyState message="No completed bookings" /> :
+              {completed.length === 0 ? <EmptyState message="No completed bookings yet" /> :
                 completed.map((b: any) => <BookingCard key={b.id} booking={b} />)}
             </TabsContent>
             <TabsContent value="other" className="space-y-3">
@@ -132,7 +111,7 @@ export default function ProBookings() {
           </Tabs>
         )}
       </div>
-      <BottomNav role="pro" />
+      <BottomNav role="client" />
     </div>
   );
 }
