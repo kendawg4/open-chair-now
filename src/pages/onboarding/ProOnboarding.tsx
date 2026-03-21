@@ -75,6 +75,9 @@ export default function ProOnboarding() {
     if (!city.trim()) { toast.error("Please enter your city"); return; }
     setLoading(true);
 
+    // Geocode the address
+    const coords = await geocodeAddress(address || null, city, stateName || null);
+
     await supabase.from("profiles").update({
       city: city.trim(),
       state: stateName.trim() || null,
@@ -93,6 +96,8 @@ export default function ProOnboarding() {
       address: address.trim() || null,
       city: city.trim() || null,
       state: stateName.trim() || null,
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
       instagram_url: instagram.trim() || null,
       accepts_walk_ins: acceptsWalkIns,
       onboarding_completed: true,
