@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Link } from "react-router-dom";
-import { MapPin, Zap, Star, Clock, Scissors, Users, TrendingUp, Shield } from "lucide-react";
+import { MapPin, Zap, Star, Clock, Scissors, Users, TrendingUp, Shield, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
 
