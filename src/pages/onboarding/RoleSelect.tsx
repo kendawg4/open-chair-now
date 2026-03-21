@@ -5,17 +5,50 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Scissors, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function RoleSelect() {
-  const { user, refreshProfile } = useAuth();
+  const { user, role, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<"client" | "professional" | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // If user already has a role, skip this page
+  useEffect(() => {
+    if (role) {
+      if (role === "professional" || role === "shop_owner") {
+        navigate("/pro/dashboard", { replace: true });
+      } else if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
+    }
+  }, [role, navigate]);
+
   const handleContinue = async () => {
     if (!selected || !user) return;
     setLoading(true);
+
+    // Check if role already exists to prevent duplicate key error
+    const { data: existing } = await supabase
+      .from("user_roles")
+      .select("id, role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing) {
+      // Role already exists — just redirect
+      await refreshProfile();
+      setLoading(false);
+      if (existing.role === "professional" || existing.role === "shop_owner") {
+        navigate("/pro/dashboard");
+      } else {
+        navigate("/home");
+      }
+      return;
+    }
+
     const { error } = await supabase.from("user_roles").insert({
       user_id: user.id,
       role: selected,

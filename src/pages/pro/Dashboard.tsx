@@ -4,19 +4,27 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useMyProProfile, useUpdateStatus, useMyBookings } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Eye, Users, Calendar, Star, Bell, ChevronRight, Clock, TrendingUp } from "lucide-react";
+import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const statuses = [
-  { value: "open-chair", emoji: "🪑" },
-  { value: "available-now", emoji: "⚡" },
-  { value: "last-minute", emoji: "🔥" },
-  { value: "appointment-only", emoji: "📅" },
-  { value: "busy", emoji: "🚫" },
-  { value: "offline", emoji: "💤" },
+  { value: "open-chair", emoji: "🪑", label: "Open Chair", desc: "Chair is open, walk-ins welcome" },
+  { value: "available-now", emoji: "⚡", label: "Available Now", desc: "Taking clients right now" },
+  { value: "last-minute", emoji: "🔥", label: "Last-Minute", desc: "Cancellation slot opened up" },
+  { value: "appointment-only", emoji: "📅", label: "Appt Only", desc: "By appointment only" },
+  { value: "busy", emoji: "🚫", label: "Busy", desc: "Currently with a client" },
+  { value: "offline", emoji: "💤", label: "Offline", desc: "Not working right now" },
 ] as const;
 
 export default function ProDashboard() {
@@ -24,6 +32,9 @@ export default function ProDashboard() {
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
   const { data: bookings } = useMyBookings("pro");
+  const [statusNote, setStatusNote] = useState("");
+  const [statusPromo, setStatusPromo] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -51,10 +62,18 @@ export default function ProDashboard() {
   }
 
   const handleStatusChange = (status: string) => {
-    updateStatus.mutate({ status }, {
-      onSuccess: () => toast.success("Status updated!"),
-      onError: (e) => toast.error(e.message),
-    });
+    updateStatus.mutate(
+      { status, note: statusNote || undefined, promo: statusPromo || undefined },
+      {
+        onSuccess: () => {
+          toast.success("Status updated!");
+          setSheetOpen(false);
+          setStatusNote("");
+          setStatusPromo("");
+        },
+        onError: (e) => toast.error(e.message),
+      }
+    );
   };
 
   const displayName = proProfile.display_name || proProfile.business_name || proProfile.full_name;
@@ -78,16 +97,80 @@ export default function ProDashboard() {
               <StatusBadge status={proProfile.status} size="sm" />
             </div>
           </div>
-          <button className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-            <Bell className="h-5 w-5" />
-          </button>
+          <div className="flex gap-2">
+            <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Bell className="h-5 w-5" />
+            </Link>
+            <Link to="/settings" className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Settings className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </header>
 
       <div className="px-4 pt-4 space-y-6">
-        {/* Status Toggle */}
+        {/* Status Control — the signature feature */}
         <section className="rounded-2xl bg-card border border-border p-4">
-          <h2 className="font-display font-bold text-base mb-3">Your status</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-bold text-base">Your status</h2>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-full text-xs h-7">
+                  Change status
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-2xl">
+                <SheetHeader>
+                  <SheetTitle className="font-display">Update your status</SheetTitle>
+                </SheetHeader>
+                <div className="py-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    {statuses.map(s => (
+                      <button
+                        key={s.value}
+                        onClick={() => handleStatusChange(s.value)}
+                        disabled={updateStatus.isPending}
+                        className={cn(
+                          "flex flex-col items-start gap-1 rounded-xl border p-3 transition-all text-left",
+                          proProfile.status === s.value
+                            ? "border-primary bg-primary/10 shadow-sm"
+                            : "border-border hover:border-primary/30"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{s.emoji}</span>
+                          <span className="text-xs font-semibold">{s.label}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{s.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Status note (optional)</label>
+                      <Input
+                        placeholder="e.g. Walk-ins welcome, Cancellation at 2:15 PM"
+                        value={statusNote}
+                        onChange={e => setStatusNote(e.target.value)}
+                        className="mt-1 rounded-xl text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Promo (optional)</label>
+                      <Input
+                        placeholder="e.g. 10% off, beard included"
+                        value={statusPromo}
+                        onChange={e => setStatusPromo(e.target.value)}
+                        className="mt-1 rounded-xl text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Quick status grid */}
           <div className="grid grid-cols-3 gap-2">
             {statuses.map(s => (
               <button
@@ -102,10 +185,22 @@ export default function ProDashboard() {
                 )}
               >
                 <span className="text-lg">{s.emoji}</span>
-                <StatusBadge status={s.value} size="sm" />
+                <span className="text-[10px] font-medium">{s.label}</span>
               </button>
             ))}
           </div>
+
+          {proProfile.status_note && (
+            <div className="mt-3 rounded-xl bg-secondary p-2.5">
+              <p className="text-xs text-muted-foreground">📝 {proProfile.status_note}</p>
+            </div>
+          )}
+          {proProfile.status_promo && (
+            <div className="mt-2 rounded-xl bg-accent/10 border border-accent/20 p-2.5">
+              <p className="text-xs text-accent font-medium">🔥 {proProfile.status_promo}</p>
+            </div>
+          )}
+
           {["open-chair", "available-now", "last-minute"].includes(proProfile.status) && (
             <div className="mt-3 rounded-xl bg-primary/10 border border-primary/20 p-3">
               <p className="text-xs text-primary font-medium">✅ You're visible to nearby clients!</p>
@@ -161,17 +256,19 @@ export default function ProDashboard() {
         {/* Quick actions */}
         <section>
           <h2 className="font-display font-bold text-base mb-3">Quick actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
             {[
-              { label: "Edit profile", desc: "Update your info" },
-              { label: "Edit services", desc: "Prices & offerings" },
-              { label: "Portfolio", desc: "Add photos" },
-              { label: "View as client", desc: "See your public profile" },
-            ].map(({ label, desc }) => (
-              <button key={label} className="text-left rounded-xl bg-card border border-border p-3.5 hover:border-primary/30 transition-colors">
-                <p className="font-semibold text-sm">{label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
-              </button>
+              { label: "Edit profile", desc: "Update your info", to: "/pro/profile-edit", icon: User },
+              { label: "View as client", desc: "See your public profile", to: proProfile?.id ? `/pro/${proProfile.id}` : "#", icon: Eye },
+            ].map(({ label, desc, to, icon: Icon }) => (
+              <Link key={label} to={to} className="flex items-center gap-3 rounded-xl bg-card border border-border p-3.5 hover:border-primary/30 transition-colors">
+                <Icon className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">{label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
             ))}
           </div>
         </section>

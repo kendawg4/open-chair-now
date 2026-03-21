@@ -17,28 +17,48 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      // Role-based redirect handled by auth context + protected routes
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id || "")
-        .limit(1)
-        .single();
+      return;
+    }
 
-      if (!roleData) {
-        navigate("/onboarding/role");
-      } else if (roleData.role === "professional" || roleData.role === "shop_owner") {
-        navigate("/pro/dashboard");
-      } else if (roleData.role === "admin") {
-        navigate("/admin");
+    const userId = authData.user?.id;
+    if (!userId) {
+      setLoading(false);
+      toast.error("Login failed");
+      return;
+    }
+
+    // Check existing role
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+
+    setLoading(false);
+
+    if (!roleData) {
+      navigate("/onboarding/role");
+    } else if (roleData.role === "professional" || roleData.role === "shop_owner") {
+      // Check if pro onboarding is completed
+      const { data: proProfile } = await supabase
+        .from("professional_profiles")
+        .select("id, onboarding_completed")
+        .eq("profile_id", (await supabase.from("profiles").select("id").eq("user_id", userId).single()).data?.id || "")
+        .maybeSingle();
+      if (!proProfile || !proProfile.onboarding_completed) {
+        navigate("/onboarding/pro");
       } else {
-        navigate("/home");
+        navigate("/pro/dashboard");
       }
+    } else if (roleData.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/home");
     }
   };
 
