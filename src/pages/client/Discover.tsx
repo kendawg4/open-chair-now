@@ -9,7 +9,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const filters = ["All", "Available Now", "Open Chair", "Barber", "Stylist", "Braider", "Nails", "Lashes", "Tattoo"];
+const filterMap: Record<string, { status?: string[]; category?: string }> = {
+  "All": {},
+  "Available Now": { status: ["open-chair", "available-now", "last-minute"] },
+  "Open Chair": { status: ["open-chair"] },
+  "Barber": { category: "barber" },
+  "Stylist": { category: "hairstylist" },
+  "Braider": { category: "braider" },
+  "Nails": { category: "nail-tech" },
+  "Lashes": { category: "lash-tech" },
+  "Tattoo": { category: "tattoo-artist" },
+};
+const filters = Object.keys(filterMap);
 
 export default function Discover() {
   const [view, setView] = useState<"map" | "list">("list");
