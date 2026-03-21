@@ -8,15 +8,28 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 export default function Search() {
+  const { profile } = useAuth();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [filters, setFilters] = useState<{ statuses: string[]; categories: string[]; walkIns: boolean | null }>({
+  const [filters, setFilters] = useState<{ statuses: string[]; categories: string[]; walkIns: boolean | null; distanceMiles: number | null }>({
     statuses: [],
     categories: [],
     walkIns: null,
+    distanceMiles: null,
   });
+  const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  useEffect(() => {
+    if (!("geolocation" in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => setUserCoords({ latitude: coords.latitude, longitude: coords.longitude }),
+      () => undefined,
+      { enableHighAccuracy: true, maximumAge: 300000, timeout: 5000 }
+    );
+  }, []);
 
   const { data: professionals, isLoading } = useProfessionals({
     search: query || undefined,
@@ -29,7 +42,18 @@ export default function Search() {
     if (q) setQuery(q);
   }, [searchParams]);
 
-  let results = query || filters.statuses.length || filters.categories.length || filters.walkIns !== null
+  const toMiles = (aLat: number, aLng: number, bLat: number, bLng: number) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const earthRadiusMiles = 3958.8;
+    const dLat = toRad(bLat - aLat);
+    const dLng = toRad(bLng - aLng);
+    const lat1 = toRad(aLat);
+    const lat2 = toRad(bLat);
+    const a = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    return 2 * earthRadiusMiles * Math.asin(Math.sqrt(a));
+  };
+
+  let results = query || filters.statuses.length || filters.categories.length || filters.walkIns !== null || filters.distanceMiles !== null
     ? (professionals || [])
     : [];
 
@@ -39,6 +63,19 @@ export default function Search() {
   }
   if (filters.walkIns !== null) {
     results = results.filter(p => p.accepts_walk_ins === filters.walkIns);
+  }
+  if (filters.distanceMiles !== null) {
+    results = results.filter((p) => {
+      if (userCoords && p.latitude && p.longitude) {
+        return toMiles(userCoords.latitude, userCoords.longitude, p.latitude, p.longitude) <= filters.distanceMiles!;
+      }
+
+      if (profile?.city && p.city) {
+        return profile.city.trim().toLowerCase() === p.city.trim().toLowerCase();
+      }
+
+      return true;
+    });
   }
   if (query) {
     const q = query.toLowerCase();
@@ -71,7 +108,7 @@ export default function Search() {
           <div className="space-y-4">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-60 rounded-2xl" />)}
           </div>
-        ) : !query && !filters.statuses.length && !filters.categories.length ? (
+        ) : !query && !filters.statuses.length && !filters.categories.length && filters.walkIns === null && filters.distanceMiles === null ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🔍</p>
             <p className="font-display font-semibold text-sm">Search for professionals</p>

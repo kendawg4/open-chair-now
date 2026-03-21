@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User, LayoutDashboard, Settings } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Eye, Scissors } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +12,10 @@ const clientNav = [
 
 const proNav = [
   { to: "/pro/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/pro/profile-edit", icon: User, label: "Profile" },
-  { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/pro/bookings", icon: Calendar, label: "Bookings" },
+  { to: "/pro/services", icon: Scissors, label: "Services" },
+  { to: "/pro/portfolio", icon: Image, label: "Portfolio" },
+  { to: "/pro/preview", icon: Eye, label: "Preview" },
 ];
 
 interface BottomNavProps {
@@ -28,7 +30,7 @@ export function BottomNav({ role = "client" }: BottomNavProps) {
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-2">
         {nav.map(({ to, icon: Icon, label }) => {
-          const active = location.pathname === to;
+          const active = location.pathname === to || (to === "/pro/preview" && location.pathname.startsWith("/pro/") && !location.pathname.startsWith("/pro/dashboard") && !location.pathname.startsWith("/pro/profile-edit") && !location.pathname.startsWith("/pro/bookings") && !location.pathname.startsWith("/pro/services") && !location.pathname.startsWith("/pro/portfolio"));
           return (
             <Link
               key={to}

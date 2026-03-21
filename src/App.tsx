@@ -21,6 +21,10 @@ import ClientProfile from "./pages/client/Profile";
 import ProProfile from "./pages/client/ProProfile";
 import ProDashboard from "./pages/pro/Dashboard";
 import ProfileEdit from "./pages/pro/ProfileEdit";
+import ProBookings from "./pages/pro/Bookings";
+import ProServices from "./pages/pro/Services";
+import ProPortfolio from "./pages/pro/Portfolio";
+import ProPreview from "./pages/pro/Preview";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -48,16 +52,20 @@ const App = () => (
             <Route path="/onboarding/pro" element={<ProOnboarding />} />
 
             {/* Client */}
-            <Route path="/home" element={<ProtectedRoute><ClientHome /></ProtectedRoute>} />
-            <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
-            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
-            <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ClientProfile /></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute allowedRoles={["client"]}><ClientHome /></ProtectedRoute>} />
+            <Route path="/discover" element={<ProtectedRoute allowedRoles={["client"]}><Discover /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute allowedRoles={["client"]}><Search /></ProtectedRoute>} />
+            <Route path="/favorites" element={<ProtectedRoute allowedRoles={["client"]}><Favorites /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowedRoles={["client"]}><ClientProfile /></ProtectedRoute>} />
             <Route path="/pro/:id" element={<ProtectedRoute><ProProfile /></ProtectedRoute>} />
 
             {/* Professional */}
             <Route path="/pro/dashboard" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProDashboard /></ProtectedRoute>} />
             <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProfileEdit /></ProtectedRoute>} />
+            <Route path="/pro/bookings" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProBookings /></ProtectedRoute>} />
+            <Route path="/pro/services" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProServices /></ProtectedRoute>} />
+            <Route path="/pro/portfolio" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPortfolio /></ProtectedRoute>} />
+            <Route path="/pro/preview" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPreview /></ProtectedRoute>} />
 
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

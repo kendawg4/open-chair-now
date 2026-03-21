@@ -31,7 +31,7 @@ const categoryFilters = [
 ];
 
 interface FilterSheetProps {
-  onApply: (filters: { statuses: string[]; categories: string[]; walkIns: boolean | null }) => void;
+  onApply: (filters: { statuses: string[]; categories: string[]; walkIns: boolean | null; distanceMiles: number | null }) => void;
 }
 
 export function FilterSheet({ onApply }: FilterSheetProps) {
@@ -39,13 +39,22 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
   const [statuses, setStatuses] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [walkIns, setWalkIns] = useState<boolean | null>(null);
+  const [distanceMiles, setDistanceMiles] = useState<number | null>(null);
+
+  const distanceOptions = [
+    { value: 1, label: "Within 1 mile" },
+    { value: 3, label: "Within 3 miles" },
+    { value: 5, label: "Within 5 miles" },
+    { value: 10, label: "Within 10 miles" },
+    { value: null, label: "Any distance" },
+  ];
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
     setter(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
   };
 
   const handleApply = () => {
-    onApply({ statuses, categories, walkIns });
+    onApply({ statuses, categories, walkIns, distanceMiles });
     setOpen(false);
   };
 
@@ -53,11 +62,12 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
     setStatuses([]);
     setCategories([]);
     setWalkIns(null);
-    onApply({ statuses: [], categories: [], walkIns: null });
+    setDistanceMiles(null);
+    onApply({ statuses: [], categories: [], walkIns: null, distanceMiles: null });
     setOpen(false);
   };
 
-  const activeCount = statuses.length + categories.length + (walkIns !== null ? 1 : 0);
+  const activeCount = statuses.length + categories.length + (walkIns !== null ? 1 : 0) + (distanceMiles !== null ? 1 : 0);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -129,6 +139,26 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
                     walkIns === opt.val
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card border-border"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Distance</p>
+            <div className="flex flex-wrap gap-2">
+              {distanceOptions.map((opt) => (
+                <button
+                  key={String(opt.value)}
+                  onClick={() => setDistanceMiles(opt.value)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
+                    distanceMiles === opt.value
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border"
                   )}
