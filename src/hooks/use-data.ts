@@ -51,6 +51,7 @@ export interface ProWithProfile {
 export function useProfessionals(filters?: {
   status?: string[];
   category?: string;
+  categories?: string[];
   city?: string;
   search?: string;
 }) {
@@ -71,7 +72,10 @@ export function useProfessionals(filters?: {
       if (filters?.status && filters.status.length > 0) {
         query = query.in("status", filters.status as any);
       }
-      if (filters?.category) {
+      // Support single category or multiple categories
+      if (filters?.categories && filters.categories.length > 0) {
+        query = query.in("category", filters.categories as any);
+      } else if (filters?.category) {
         query = query.eq("category", filters.category as any);
       }
       if (filters?.city) {
