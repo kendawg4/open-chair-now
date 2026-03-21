@@ -160,7 +160,10 @@ export default function Search() {
             <p className="text-xs text-muted-foreground">
               {results.length} result{results.length !== 1 ? "s" : ""}
               {filters.distanceMiles !== null && !userCoords && (
-                <span className="ml-1">· Distance filtered by city (enable location for precise results)</span>
+                <span className="ml-1">· Filtered by city/state (enable location for precise distance)</span>
+              )}
+              {filters.distanceMiles !== null && userCoords && (
+                <span className="ml-1">· Within {filters.distanceMiles} mi</span>
               )}
             </p>
             {results.map(pro => <ProCard key={pro.id} pro={pro} />)}
