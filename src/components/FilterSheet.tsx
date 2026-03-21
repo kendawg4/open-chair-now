@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, MapPin } from "lucide-react";
 
 const statusFilters = [
   { value: "open-chair", label: "Open Chair" },
@@ -32,9 +32,11 @@ const categoryFilters = [
 
 interface FilterSheetProps {
   onApply: (filters: { statuses: string[]; categories: string[]; walkIns: boolean | null; distanceMiles: number | null }) => void;
+  locationAvailable?: boolean;
+  locationDenied?: boolean;
 }
 
-export function FilterSheet({ onApply }: FilterSheetProps) {
+export function FilterSheet({ onApply, locationAvailable, locationDenied }: FilterSheetProps) {
   const [open, setOpen] = useState(false);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -42,11 +44,11 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
   const [distanceMiles, setDistanceMiles] = useState<number | null>(null);
 
   const distanceOptions = [
-    { value: 1, label: "Within 1 mile" },
-    { value: 3, label: "Within 3 miles" },
-    { value: 5, label: "Within 5 miles" },
-    { value: 10, label: "Within 10 miles" },
-    { value: null, label: "Any distance" },
+    { value: 1, label: "Within 1 mi" },
+    { value: 3, label: "Within 3 mi" },
+    { value: 5, label: "Within 5 mi" },
+    { value: 10, label: "Within 10 mi" },
+    { value: 25, label: "Within 25 mi" },
   ];
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
@@ -150,12 +152,20 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Distance</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+              <MapPin className="h-3 w-3" />
+              Distance
+              {!locationAvailable && (
+                <span className="text-[10px] font-normal text-muted-foreground/70 ml-1">
+                  {locationDenied ? "(location denied — filtering by city)" : "(requesting location…)"}
+                </span>
+              )}
+            </p>
             <div className="flex flex-wrap gap-2">
               {distanceOptions.map((opt) => (
                 <button
-                  key={String(opt.value)}
-                  onClick={() => setDistanceMiles(opt.value)}
+                  key={opt.value}
+                  onClick={() => setDistanceMiles(distanceMiles === opt.value ? null : opt.value)}
                   className={cn(
                     "rounded-full px-3 py-1.5 text-xs font-medium border transition-colors",
                     distanceMiles === opt.value
@@ -167,11 +177,18 @@ export function FilterSheet({ onApply }: FilterSheetProps) {
                 </button>
               ))}
             </div>
+            {!locationAvailable && distanceMiles !== null && (
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                📍 Without location access, distance filters match by city name instead.
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
             <Button variant="outline" className="flex-1 rounded-xl" onClick={handleClear}>Clear all</Button>
-            <Button className="flex-1 rounded-xl" onClick={handleApply}>Apply</Button>
+            <Button className="flex-1 rounded-xl" onClick={handleApply}>
+              Apply{activeCount > 0 ? ` (${activeCount})` : ""}
+            </Button>
           </div>
         </div>
       </SheetContent>
