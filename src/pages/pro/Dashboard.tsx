@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useMyProProfile, useUpdateStatus, useMyBookings } from "@/hooks/use-data";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User } from "lucide-react";
+import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -17,6 +17,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statuses = [
   { value: "open-chair", emoji: "🪑", label: "Open Chair", desc: "Chair is open, walk-ins welcome" },
@@ -34,7 +41,18 @@ export default function ProDashboard() {
   const { data: bookings } = useMyBookings("pro");
   const [statusNote, setStatusNote] = useState("");
   const [statusPromo, setStatusPromo] = useState("");
+  const [statusDuration, setStatusDuration] = useState("none");
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const statusExpiresAt = useMemo(() => {
+    if (statusDuration === "none") return null;
+    const now = new Date();
+    if (statusDuration === "30m") now.setMinutes(now.getMinutes() + 30);
+    if (statusDuration === "1h") now.setHours(now.getHours() + 1);
+    if (statusDuration === "3h") now.setHours(now.getHours() + 3);
+    if (statusDuration === "eod") now.setHours(23, 59, 0, 0);
+    return now.toISOString();
+  }, [statusDuration]);
 
   if (isLoading) {
     return (
@@ -63,13 +81,14 @@ export default function ProDashboard() {
 
   const handleStatusChange = (status: string) => {
     updateStatus.mutate(
-      { status, note: statusNote || undefined, promo: statusPromo || undefined },
+      { status, note: statusNote || undefined, promo: statusPromo || undefined, expiresAt: statusExpiresAt },
       {
         onSuccess: () => {
           toast.success("Status updated!");
           setSheetOpen(false);
           setStatusNote("");
           setStatusPromo("");
+          setStatusDuration("none");
         },
         onError: (e) => toast.error(e.message),
       }
@@ -112,7 +131,17 @@ export default function ProDashboard() {
         {/* Status Control — the signature feature */}
         <section className="rounded-2xl bg-card border border-border p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-base">Your status</h2>
+            <div>
+              <h2 className="font-display font-bold text-base">Your status</h2>
+              <div className="mt-1 flex items-center gap-2">
+                <StatusBadge status={proProfile.status} size="md" pulse />
+                {proProfile.status_expires_at && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Until {new Date(proProfile.status_expires_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                  </span>
+                )}
+              </div>
+            </div>
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="rounded-full text-xs h-7">
@@ -163,6 +192,21 @@ export default function ProDashboard() {
                         onChange={e => setStatusPromo(e.target.value)}
                         className="mt-1 rounded-xl text-sm"
                       />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Status expiration</label>
+                      <Select value={statusDuration} onValueChange={setStatusDuration}>
+                        <SelectTrigger className="mt-1 rounded-xl text-sm">
+                          <SelectValue placeholder="No expiration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No expiration</SelectItem>
+                          <SelectItem value="30m">30 minutes</SelectItem>
+                          <SelectItem value="1h">1 hour</SelectItem>
+                          <SelectItem value="3h">3 hours</SelectItem>
+                          <SelectItem value="eod">End of day</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -259,7 +303,12 @@ export default function ProDashboard() {
           <div className="space-y-1">
             {[
               { label: "Edit profile", desc: "Update your info", to: "/pro/profile-edit", icon: User },
-              { label: "View as client", desc: "See your public profile", to: proProfile?.id ? `/pro/${proProfile.id}` : "#", icon: Eye },
+              { label: "Public profile preview", desc: "See what clients see", to: "/pro/preview", icon: Eye },
+              { label: "Manage services", desc: "View your service menu", to: "/pro/services", icon: Scissors },
+              { label: "Manage portfolio", desc: "Review your portfolio", to: "/pro/portfolio", icon: Image },
+              { label: "Bookings", desc: "Handle requests and appointments", to: "/pro/bookings", icon: Calendar },
+              { label: "Notifications", desc: "Check recent updates", to: "/notifications", icon: Bell },
+              { label: "Settings", desc: "Account and preferences", to: "/settings", icon: Settings },
             ].map(({ label, desc, to, icon: Icon }) => (
               <Link key={label} to={to} className="flex items-center gap-3 rounded-xl bg-card border border-border p-3.5 hover:border-primary/30 transition-colors">
                 <Icon className="h-5 w-5 text-muted-foreground" />
@@ -271,6 +320,15 @@ export default function ProDashboard() {
               </Link>
             ))}
           </div>
+        </section>
+
+        <section className="rounded-2xl bg-card border border-border p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="h-4 w-4 text-primary" />
+            <h2 className="font-display font-bold text-base">Mode</h2>
+          </div>
+          <p className="text-sm font-medium">Professional mode is active</p>
+          <p className="text-xs text-muted-foreground mt-1">Professional accounts stay in the pro app shell and land here after login.</p>
         </section>
       </div>
 

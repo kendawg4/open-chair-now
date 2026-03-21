@@ -132,6 +132,8 @@ export function useRealtimeProfessionals() {
         { event: "UPDATE", schema: "public", table: "professional_profiles" },
         () => {
           queryClient.invalidateQueries({ queryKey: ["professionals"] });
+          queryClient.invalidateQueries({ queryKey: ["professional"] });
+          queryClient.invalidateQueries({ queryKey: ["myProProfile"] });
         }
       )
       .subscribe();
@@ -179,7 +181,7 @@ export function useUpdateStatus() {
   const { proProfileId } = useAuth();
 
   return useMutation({
-    mutationFn: async (args: { status: string; note?: string; promo?: string }) => {
+    mutationFn: async (args: { status: string; note?: string; promo?: string; expiresAt?: string | null }) => {
       if (!proProfileId) throw new Error("No pro profile");
       const { error } = await supabase
         .from("professional_profiles")
@@ -187,6 +189,7 @@ export function useUpdateStatus() {
           status: args.status as any,
           status_note: args.note || null,
           status_promo: args.promo || null,
+          status_expires_at: args.expiresAt || null,
         })
         .eq("id", proProfileId);
       if (error) throw error;
@@ -197,11 +200,13 @@ export function useUpdateStatus() {
         status: args.status as any,
         note: args.note || null,
         promo_text: args.promo || null,
+          ends_at: args.expiresAt || null,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["myProProfile"] });
       queryClient.invalidateQueries({ queryKey: ["professionals"] });
+      queryClient.invalidateQueries({ queryKey: ["professional"] });
     },
   });
 }
