@@ -1,7 +1,7 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LogOut, Bell, Shield, HelpCircle, ChevronRight, User, Moon } from "lucide-react";
+import { ArrowLeft, LogOut, Bell, Shield, HelpCircle, ChevronRight, User, FileText, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Settings() {
