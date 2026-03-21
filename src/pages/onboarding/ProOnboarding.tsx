@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CheckCircle2 } from "lucide-react";
 
 const categories = [
   { value: "barber", label: "Barber", emoji: "✂️" },
@@ -47,8 +49,8 @@ export default function ProOnboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
-  // Form state
   const [category, setCategory] = useState<string>("");
   const [businessType, setBusinessType] = useState<string>("independent");
   const [businessName, setBusinessName] = useState("");
@@ -56,10 +58,12 @@ export default function ProOnboarding() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
+  const [phone, setPhone] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [bio, setBio] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [instagram, setInstagram] = useState("");
+  const [acceptsWalkIns, setAcceptsWalkIns] = useState(true);
 
   const toggleSpecialty = (s: string) => {
     setSpecialties(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
@@ -67,28 +71,29 @@ export default function ProOnboarding() {
 
   const handleComplete = async () => {
     if (!profile || !category) return;
+    if (!city.trim()) { toast.error("Please enter your city"); return; }
     setLoading(true);
 
-    // Update profile
     await supabase.from("profiles").update({
-      city,
-      state: stateName,
-      bio,
+      city: city.trim(),
+      state: stateName.trim() || null,
+      phone: phone.trim() || null,
+      bio: bio.trim() || null,
     }).eq("id", profile.id);
 
-    // Create professional profile
     const { error } = await supabase.from("professional_profiles").insert({
       profile_id: profile.id,
-      business_name: businessName || null,
+      business_name: businessName.trim() || null,
       category: category as any,
       business_type: businessType as any,
       specialties,
       years_experience: parseInt(yearsExperience) || 0,
-      shop_name: shopName || null,
-      address: address || null,
-      city: city || null,
-      state: stateName || null,
-      instagram_url: instagram || null,
+      shop_name: shopName.trim() || null,
+      address: address.trim() || null,
+      city: city.trim() || null,
+      state: stateName.trim() || null,
+      instagram_url: instagram.trim() || null,
+      accepts_walk_ins: acceptsWalkIns,
       onboarding_completed: true,
     });
 
@@ -97,10 +102,24 @@ export default function ProOnboarding() {
       toast.error(error.message);
     } else {
       await refreshProfile();
-      toast.success("Profile created! Welcome to OpenChair Pro!");
-      navigate("/pro/dashboard");
+      setDone(true);
+      setTimeout(() => navigate("/pro/dashboard"), 1800);
     }
   };
+
+  if (done) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-3">
+          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="font-display text-2xl font-bold">You're all set!</h1>
+          <p className="text-sm text-muted-foreground">Welcome to OpenChair Pro. Taking you to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col px-4 py-8">
@@ -109,7 +128,7 @@ export default function ProOnboarding() {
           <p className="text-xs text-primary font-medium">Step {step} of 3</p>
           <div className="flex gap-1 mt-2">
             {[1, 2, 3].map(s => (
-              <div key={s} className={cn("h-1 flex-1 rounded-full", s <= step ? "bg-primary" : "bg-secondary")} />
+              <div key={s} className={cn("h-1 flex-1 rounded-full transition-colors", s <= step ? "bg-primary" : "bg-secondary")} />
             ))}
           </div>
         </div>
@@ -137,7 +156,7 @@ export default function ProOnboarding() {
                 </button>
               ))}
             </div>
-            <Button className="w-full rounded-xl" disabled={!category} onClick={() => setStep(2)}>
+            <Button className="w-full rounded-xl h-11" disabled={!category} onClick={() => setStep(2)}>
               Continue
             </Button>
           </div>
@@ -172,29 +191,34 @@ export default function ProOnboarding() {
               </div>
 
               <div className="space-y-2">
-                <Label>Business/Brand name (optional)</Label>
+                <Label>Business/Brand name <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Input value={businessName} onChange={e => setBusinessName(e.target.value)} className="rounded-xl" placeholder="e.g. Marcus Cuts Studio" />
               </div>
 
               <div className="space-y-2">
-                <Label>Shop/Studio name (optional)</Label>
+                <Label>Shop/Studio name <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Input value={shopName} onChange={e => setShopName(e.target.value)} className="rounded-xl" placeholder="e.g. Elite Barbershop" />
               </div>
 
               <div className="space-y-2">
-                <Label>Address</Label>
+                <Label>Address <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Input value={address} onChange={e => setAddress(e.target.value)} className="rounded-xl" placeholder="123 Main St" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label>City</Label>
+                  <Label>City <span className="text-destructive">*</span></Label>
                   <Input value={city} onChange={e => setCity(e.target.value)} className="rounded-xl" placeholder="Brooklyn" />
                 </div>
                 <div className="space-y-2">
                   <Label>State</Label>
                   <Input value={stateName} onChange={e => setStateName(e.target.value)} className="rounded-xl" placeholder="NY" />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Phone number <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="rounded-xl" placeholder="(555) 123-4567" />
               </div>
 
               <div className="space-y-2">
@@ -205,7 +229,7 @@ export default function ProOnboarding() {
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setStep(1)}>Back</Button>
-              <Button className="flex-1 rounded-xl" onClick={() => setStep(3)}>Continue</Button>
+              <Button className="flex-1 rounded-xl" onClick={() => setStep(3)} disabled={!city.trim()}>Continue</Button>
             </div>
           </div>
         )}
@@ -214,7 +238,7 @@ export default function ProOnboarding() {
           <div className="space-y-5">
             <div>
               <h1 className="font-display text-2xl font-bold">Final details</h1>
-              <p className="text-sm text-muted-foreground mt-1">Specialties & bio</p>
+              <p className="text-sm text-muted-foreground mt-1">Specialties, bio & preferences</p>
             </div>
 
             <div className="space-y-4">
@@ -248,18 +272,28 @@ export default function ProOnboarding() {
                   placeholder="Tell clients about your style and experience..."
                   className="rounded-xl resize-none"
                   rows={3}
+                  maxLength={500}
                 />
+                <p className="text-[10px] text-muted-foreground text-right">{bio.length}/500</p>
               </div>
 
               <div className="space-y-2">
-                <Label>Instagram (optional)</Label>
+                <Label>Instagram <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Input value={instagram} onChange={e => setInstagram(e.target.value)} className="rounded-xl" placeholder="@yourusername" />
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl bg-card border border-border p-3.5">
+                <div>
+                  <p className="text-sm font-medium">Accept walk-ins?</p>
+                  <p className="text-xs text-muted-foreground">Clients can visit without an appointment</p>
+                </div>
+                <Switch checked={acceptsWalkIns} onCheckedChange={setAcceptsWalkIns} />
               </div>
             </div>
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setStep(2)}>Back</Button>
-              <Button className="flex-1 rounded-xl" onClick={handleComplete} disabled={loading}>
+              <Button className="flex-1 rounded-xl h-11" onClick={handleComplete} disabled={loading}>
                 {loading ? "Creating..." : "Complete Setup"}
               </Button>
             </div>
