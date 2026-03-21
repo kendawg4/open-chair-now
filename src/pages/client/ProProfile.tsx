@@ -12,6 +12,7 @@ import { BookingSheet } from "@/components/BookingSheet";
 
 export default function ProProfile() {
   const { id } = useParams();
+  const [bookingOpen, setBookingOpen] = useState(false);
   const { user } = useAuth();
   const { data: pro, isLoading } = useProfessionalById(id);
   const { data: reviews } = useReviewsForPro(id);
