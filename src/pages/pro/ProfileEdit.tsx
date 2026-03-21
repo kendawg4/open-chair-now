@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { geocodeAddress } from "@/hooks/use-geocode";
 import { statusLabels, categoryLabels } from "@/lib/constants";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
