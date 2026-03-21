@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Link } from "react-router-dom";
-import { MapPin, Zap, Star, Clock, Scissors, Users, TrendingUp, Shield } from "lucide-react";
+import { MapPin, Zap, Star, Clock, Scissors, Users, TrendingUp, Shield, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
 
@@ -116,8 +116,30 @@ export default function Landing() {
             ))}
           </div>
           <Button className="mt-8 rounded-full px-8" asChild>
-            <Link to={user ? "/pro/dashboard" : "/signup"}>Join as a Professional</Link>
+            <Link to="/waitlist/pro">Join the Professional Waitlist</Link>
           </Button>
+        </div>
+      </section>
+
+      {/* Waitlist CTA */}
+      <section className="px-4 py-16 bg-primary/5">
+        <div className="mx-auto max-w-lg text-center">
+          <h2 className="font-display text-2xl font-bold mb-2">Launching soon in select cities</h2>
+          <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
+            OpenChair is rolling out city by city. Join the waitlist to get early access and help shape the future of beauty booking.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" className="rounded-full text-base px-8" asChild>
+              <Link to="/waitlist/client">
+                <Sparkles className="h-5 w-5 mr-1" /> Get Early Access
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="rounded-full text-base px-8" asChild>
+              <Link to="/waitlist/pro">
+                <Scissors className="h-5 w-5 mr-1" /> Join as a Pro
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 

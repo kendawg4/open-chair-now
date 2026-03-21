@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
+import ProWaitlist from "./pages/waitlist/ProWaitlist";
+import ClientWaitlist from "./pages/waitlist/ClientWaitlist";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/waitlist/pro" element={<ProWaitlist />} />
+            <Route path="/waitlist/client" element={<ClientWaitlist />} />
 
             {/* Onboarding */}
             <Route path="/onboarding/role" element={<RoleSelect />} />
