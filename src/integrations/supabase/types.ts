@@ -155,6 +155,45 @@ export type Database = {
           },
         ]
       }
+      client_waitlist: {
+        Row: {
+          city: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          referral_source: string | null
+          services_interested: string | null
+          state: string
+          wants_realtime_availability: boolean | null
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          referral_source?: string | null
+          services_interested?: string | null
+          state: string
+          wants_realtime_availability?: boolean | null
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          referral_source?: string | null
+          services_interested?: string | null
+          state?: string
+          wants_realtime_availability?: boolean | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           client_profile_id: string
@@ -368,6 +407,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pro_waitlist: {
+        Row: {
+          accepts_walk_ins: boolean | null
+          additional_notes: string | null
+          business_name: string | null
+          category: string
+          city: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          instagram: string | null
+          phone: string
+          specialties: string | null
+          state: string
+          wants_open_chair_alerts: boolean | null
+        }
+        Insert: {
+          accepts_walk_ins?: boolean | null
+          additional_notes?: string | null
+          business_name?: string | null
+          category: string
+          city: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          instagram?: string | null
+          phone: string
+          specialties?: string | null
+          state: string
+          wants_open_chair_alerts?: boolean | null
+        }
+        Update: {
+          accepts_walk_ins?: boolean | null
+          additional_notes?: string | null
+          business_name?: string | null
+          category?: string
+          city?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          instagram?: string | null
+          phone?: string
+          specialties?: string | null
+          state?: string
+          wants_open_chair_alerts?: boolean | null
+        }
+        Relationships: []
       }
       professional_profiles: {
         Row: {
