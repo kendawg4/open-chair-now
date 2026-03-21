@@ -27,21 +27,11 @@ export default function Discover() {
   const [activeFilter, setActiveFilter] = useState("All");
   useRealtimeProfessionals();
 
-  const statusFilter = activeFilter === "Available Now"
-    ? ["open-chair", "available-now", "last-minute"]
-    : activeFilter === "Open Chair"
-    ? ["open-chair"]
-    : undefined;
-
-  const categoryFilter = !["All", "Available Now", "Open Chair"].includes(activeFilter)
-    ? Object.entries(categoryLabels).find(([_, label]) =>
-        label.toLowerCase().startsWith(activeFilter.toLowerCase())
-      )?.[0]
-    : undefined;
+  const activeMapping = filterMap[activeFilter] || {};
 
   const { data: professionals, isLoading } = useProfessionals({
-    status: statusFilter,
-    category: categoryFilter,
+    status: activeMapping.status,
+    category: activeMapping.category,
   });
 
   const filtered = professionals || [];
