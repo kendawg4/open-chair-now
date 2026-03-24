@@ -122,6 +122,8 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         profile_id: profile.id,
         content: commentText.trim(),
       });
+      // Update comment_count on the post
+      await supabase.from("posts").update({ comment_count: (post.comment_count || 0) + comments.length + 1 } as any).eq("id", post.id);
       setCommentText("");
       loadComments();
       queryClient.invalidateQueries({ queryKey: ["feed"] });
