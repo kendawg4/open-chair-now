@@ -67,7 +67,8 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         await supabase.from("post_likes").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
       // Update post likes_count
-      await supabase.from("posts").update({ likes_count: newLiked ? likesCount + 1 : likesCount - 1 } as any).eq("id", post.id);
+      const newCount = newLiked ? likesCount + 1 : likesCount - 1;
+      await supabase.from("posts").update({ likes_count: Math.max(0, newCount) } as any).eq("id", post.id);
     } catch {
       setLiked(!newLiked);
       setLikesCount(prev => newLiked ? prev - 1 : prev + 1);
@@ -86,6 +87,9 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
       } else {
         await supabase.from("reposts").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
+      // Update repost_count on post
+      const newCount = newReposted ? repostCount + 1 : repostCount - 1;
+      await supabase.from("posts").update({ repost_count: Math.max(0, newCount) } as any).eq("id", post.id);
     } catch {
       setReposted(!newReposted);
       setRepostCount((prev: number) => newReposted ? prev - 1 : prev + 1);
@@ -118,6 +122,8 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         profile_id: profile.id,
         content: commentText.trim(),
       });
+      // Update comment_count on the post
+      await supabase.from("posts").update({ comment_count: (post.comment_count || 0) + comments.length + 1 } as any).eq("id", post.id);
       setCommentText("");
       loadComments();
       queryClient.invalidateQueries({ queryKey: ["feed"] });

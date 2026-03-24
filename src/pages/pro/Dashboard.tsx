@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { OpenChairToggle } from "@/components/OpenChairToggle";
 import { CreatePostSheet } from "@/components/CreatePostSheet";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
-import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals, useFeed } from "@/hooks/use-data";
+import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals, useFeed, useRealtimeBookings } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +63,7 @@ export default function ProDashboard() {
   const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   useRealtimeProfessionals();
+  useRealtimeBookings();
 
   const statusExpiresAt = useMemo(() => {
     if (statusDuration === "none") return null;

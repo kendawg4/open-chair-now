@@ -125,7 +125,7 @@ export default function ClientHome() {
           ) : (
             <div className="space-y-4">
               {(feed || []).map(post => (
-                <SocialFeedCard key={post.id} post={post} />
+                <SocialFeedCard key={post.id} post={post} isLiked={post._isLiked} isReposted={post._isReposted} />
               ))}
             </div>
           )}

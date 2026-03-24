@@ -452,12 +452,17 @@ export function useFeed() {
     queryFn: async () => {
       // Get IDs of followed pros
       let followedIds: string[] = [];
+      let likedPostIds: string[] = [];
+      let repostedPostIds: string[] = [];
       if (profile) {
-        const { data: follows } = await supabase
-          .from("follows")
-          .select("professional_profile_id")
-          .eq("client_profile_id", profile.id);
-        followedIds = (follows || []).map((f: any) => f.professional_profile_id);
+        const [followsRes, likesRes, repostsRes] = await Promise.all([
+          supabase.from("follows").select("professional_profile_id").eq("client_profile_id", profile.id),
+          supabase.from("post_likes").select("post_id").eq("profile_id", profile.id),
+          supabase.from("reposts").select("post_id").eq("profile_id", profile.id),
+        ]);
+        followedIds = (followsRes.data || []).map((f: any) => f.professional_profile_id);
+        likedPostIds = (likesRes.data || []).map((l: any) => l.post_id);
+        repostedPostIds = (repostsRes.data || []).map((r: any) => r.post_id);
       }
 
       // Fetch posts — all recent, we'll sort client-side
@@ -475,6 +480,8 @@ export function useFeed() {
         pro_category: post.professional_profiles?.category,
         pro_status: post.professional_profiles?.status,
         _isFollowed: followedIds.includes(post.professional_profile_id),
+        _isLiked: likedPostIds.includes(post.id),
+        _isReposted: repostedPostIds.includes(post.id),
         _score: (post.likes_count || 0) + (post.comment_count || 0) * 2 + (post.repost_count || 0) * 3,
       }));
 
@@ -549,8 +556,32 @@ export function useCreatePost() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["myPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["proPosts"] });
     },
   });
+}
+
+// ===== REALTIME BOOKINGS =====
+export function useRealtimeBookings() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("booking-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 }
 
 // ===== NOTIFICATIONS =====
