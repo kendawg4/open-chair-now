@@ -2,10 +2,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProCard } from "@/components/ProCard";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { StatusBadge } from "@/components/StatusBadge";
+import { OpenChairsMap } from "@/components/OpenChairsMap";
 import { useProfessionals, useFeed, useRealtimeProfessionals } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "react-router-dom";
-import { MapPin, Bell, ChevronRight } from "lucide-react";
+import { MapPin, Bell, ChevronRight, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ClientHome() {
@@ -29,9 +30,14 @@ export default function ClientHome() {
               <span>{profile?.city || "Nearby"}</span>
             </div>
           </div>
-          <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-            <Bell className="h-5 w-5" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/messages" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <MessageCircle className="h-5 w-5" />
+            </Link>
+            <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Bell className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -77,6 +83,17 @@ export default function ClientHome() {
               </Link>
             ))}
           </div>
+        </section>
+
+        {/* Open Chairs Map */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-bold text-base">🪑 Open Chairs Near You</h2>
+            <Link to="/discover" className="flex items-center gap-0.5 text-xs text-primary font-medium">
+              Map <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <OpenChairsMap professionals={professionals || []} />
         </section>
 
         {/* Map CTA */}

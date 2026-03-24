@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -14,8 +14,8 @@ const clientNav = [
 const proNav = [
   { to: "/pro/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/pro/bookings", icon: Calendar, label: "Bookings" },
+  { to: "/messages", icon: MessageCircle, label: "Messages" },
   { to: "/pro/services", icon: Scissors, label: "Services" },
-  { to: "/pro/portfolio", icon: Image, label: "Portfolio" },
   { to: "/pro/my-profile", icon: User, label: "Profile" },
 ];
 

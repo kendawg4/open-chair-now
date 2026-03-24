@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { categoryLabels } from "@/lib/constants";
-import { Heart, MessageCircle, Repeat2, Share2, Send } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Share2, Send, Pin, PinOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,12 +25,16 @@ interface SocialFeedCardProps {
     pro_avatar?: string | null;
     pro_category?: string;
     pro_status?: string;
+    is_pinned?: boolean;
   };
   isLiked?: boolean;
   isReposted?: boolean;
+  isOwner?: boolean;
+  onPin?: (postId: string) => void;
+  onUnpin?: (postId: string) => void;
 }
 
-export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted }: SocialFeedCardProps) {
+export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, onPin, onUnpin }: SocialFeedCardProps) {
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
   const [liked, setLiked] = useState(initialLiked || false);
@@ -133,9 +137,16 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+    <div className={cn("bg-card border rounded-2xl overflow-hidden", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border")}>
+      {/* Pinned indicator */}
+      {post.is_pinned && (
+        <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-primary font-medium">
+          <Pin className="h-3 w-3" /> Pinned
+        </div>
+      )}
       {/* Header */}
-      <Link to={`/pro/${post.professional_profile_id}`} className="flex items-center gap-3 p-4 pb-2">
+      <div className="flex items-center gap-3 p-4 pb-2">
+        <Link to={`/pro/${post.professional_profile_id}`} className="flex items-center gap-3 flex-1 min-w-0">
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
           {post.pro_avatar ? (
             <img src={post.pro_avatar} alt={post.pro_name || ""} className="h-full w-full object-cover" />
@@ -152,7 +163,17 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
             {post.pro_category ? categoryLabels[post.pro_category] || post.pro_category : ""} · {timeAgo(post.created_at)}
           </p>
         </div>
-      </Link>
+        </Link>
+        {isOwner && (
+          <button
+            onClick={() => post.is_pinned ? onUnpin?.(post.id) : onPin?.(post.id)}
+            className="text-muted-foreground hover:text-primary transition-colors shrink-0"
+            title={post.is_pinned ? "Unpin" : "Pin to profile"}
+          >
+            {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
 
       {/* Content */}
       <p className="px-4 pb-3 text-sm leading-relaxed">{post.content}</p>

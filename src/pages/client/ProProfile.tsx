@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow } from "@/hooks/use-data";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow, useTogglePinPost, useUnpinPost } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { categoryLabels } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { BookingSheet } from "@/components/BookingSheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useStartConversation } from "@/hooks/use-messaging";
 
 function useProPosts(proProfileId: string | undefined) {
   return useQuery({
@@ -35,9 +36,10 @@ function useProPosts(proProfileId: string | undefined) {
 
 export default function ProProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("posts");
-  const { user } = useAuth();
+  const { user, profile: myProfile, proProfileId } = useAuth();
   const { data: pro, isLoading } = useProfessionalById(id);
   const { data: reviews } = useReviewsForPro(id);
   const { data: posts } = useProPosts(id);
@@ -45,6 +47,10 @@ export default function ProProfile() {
   const { data: isFollowing } = useIsFollowing(id);
   const toggleFav = useToggleFavorite();
   const toggleFollow = useToggleFollow();
+  const pinPost = useTogglePinPost();
+  const unpinPost = useUnpinPost();
+  const startConversation = useStartConversation();
+  const isOwnProfile = proProfileId === id;
 
   if (isLoading) {
     return (
@@ -92,6 +98,17 @@ export default function ProProfile() {
   const handleFollow = () => {
     if (!user) { toast.error("Sign in to follow"); return; }
     if (id) toggleFollow.mutate(id);
+  };
+
+  const handleMessage = async () => {
+    if (!user) { toast.error("Sign in to message"); return; }
+    if (!pro?.profile_id) return;
+    try {
+      const convId = await startConversation.mutateAsync(pro.profile_id);
+      navigate(`/messages/${convId}`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to start conversation");
+    }
   };
 
   const handleShare = async () => {
@@ -186,6 +203,16 @@ export default function ProProfile() {
             <Users className="h-4 w-4 mr-1" />
             {isFollowing ? "Following" : "Follow"}
           </Button>
+          {!isOwnProfile && (
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={handleMessage}
+              disabled={startConversation.isPending}
+            >
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="outline"
             className="flex-1 rounded-full"
@@ -234,18 +261,27 @@ export default function ProProfile() {
                 <p className="text-sm text-muted-foreground">No posts yet</p>
               </div>
             ) : (
-              posts!.map((post: any) => (
-                <SocialFeedCard
-                  key={post.id}
-                  post={{
-                    ...post,
-                    pro_name: displayName,
-                    pro_avatar: pro.avatar_url,
-                    pro_category: pro.category,
-                    pro_status: pro.status,
-                  }}
-                />
-              ))
+              [...posts!]
+                .sort((a: any, b: any) => {
+                  if (a.is_pinned && !b.is_pinned) return -1;
+                  if (!a.is_pinned && b.is_pinned) return 1;
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                })
+                .map((post: any) => (
+                  <SocialFeedCard
+                    key={post.id}
+                    post={{
+                      ...post,
+                      pro_name: displayName,
+                      pro_avatar: pro.avatar_url,
+                      pro_category: pro.category,
+                      pro_status: pro.status,
+                    }}
+                    isOwner={isOwnProfile}
+                    onPin={(postId) => pinPost.mutate(postId)}
+                    onUnpin={(postId) => unpinPost.mutate(postId)}
+                  />
+                ))
             )}
           </TabsContent>
 

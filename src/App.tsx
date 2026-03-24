@@ -38,6 +38,8 @@ import ProProfileSelf from "./pages/pro/ProfileSelf";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
+import Inbox from "./pages/messages/Inbox";
+import ConversationPage from "./pages/messages/Conversation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +93,8 @@ const App = () => (
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
+            <Route path="/messages/:id" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
