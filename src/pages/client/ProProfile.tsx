@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow } from "@/hooks/use-data";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow, useTogglePinPost, useUnpinPost } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { categoryLabels } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { BookingSheet } from "@/components/BookingSheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useStartConversation } from "@/hooks/use-messaging";
 
 function useProPosts(proProfileId: string | undefined) {
   return useQuery({
