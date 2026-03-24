@@ -136,16 +136,33 @@ export default function ProProfile() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Link to="/home" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          {isOwnProfile ? (
+            <div />
+          ) : (
+            <Link to="/home" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          )}
           <div className="flex gap-2">
-            <button onClick={handleShare} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-              <Globe className="h-4 w-4" />
-            </button>
-            <button onClick={handleFavorite} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-              <Heart className={cn("h-4 w-4 transition-colors", isFav && "fill-destructive text-destructive")} />
-            </button>
+            {isOwnProfile ? (
+              <>
+                <Link to="/pro/profile-edit" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Edit2 className="h-4 w-4" />
+                </Link>
+                <Link to="/settings" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <button onClick={handleShare} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Globe className="h-4 w-4" />
+                </button>
+                <button onClick={handleFavorite} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Heart className={cn("h-4 w-4 transition-colors", isFav && "fill-destructive text-destructive")} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
