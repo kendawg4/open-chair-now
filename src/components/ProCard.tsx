@@ -1,4 +1,5 @@
 import { StatusBadge } from "./StatusBadge";
+import { RoleBadge } from "./RoleBadge";
 import { categoryLabels } from "@/lib/constants";
 import { Star, MapPin, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
