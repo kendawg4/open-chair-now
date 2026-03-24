@@ -51,6 +51,7 @@ export default function ProProfile() {
   const unpinPost = useUnpinPost();
   const startConversation = useStartConversation();
   const isOwnProfile = proProfileId === id;
+  const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   if (isLoading) {
     return (
