@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper, MessageCircle, Edit2, PenSquare, Plus, Settings } from "lucide-react";
+import { RoleBadge } from "@/components/RoleBadge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { BookingSheet } from "@/components/BookingSheet";
