@@ -297,6 +297,9 @@ export default function ProDashboard() {
           )}
         </section>
 
+        {/* Activity Feed — posts from followed pros + trending */}
+        <ActivityFeedSection />
+
         {/* My Posts Feed */}
         {myPosts && myPosts.length > 0 && (
           <section>
