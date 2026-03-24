@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/BottomNav";
 import { ProCard } from "@/components/ProCard";
-import { FeedCard } from "@/components/FeedCard";
+import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useProfessionals, useFeed, useRealtimeProfessionals } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
@@ -93,9 +93,9 @@ export default function ClientHome() {
           </div>
         </Link>
 
-        {/* Feed */}
+        {/* Activity Feed — social posts from pros */}
         <section>
-          <h2 className="font-display font-bold text-base mb-3">Latest updates</h2>
+          <h2 className="font-display font-bold text-base mb-3">Activity Feed</h2>
           {feedLoading ? (
             <div className="space-y-4">
               {[1,2].map(i => <Skeleton key={i} className="h-40 rounded-2xl" />)}
@@ -103,12 +103,12 @@ export default function ClientHome() {
           ) : (feed || []).length === 0 ? (
             <div className="text-center py-8 bg-card rounded-2xl border border-border">
               <p className="text-2xl mb-2">📝</p>
-              <p className="text-sm text-muted-foreground">No posts yet</p>
+              <p className="text-sm text-muted-foreground">No posts yet. Follow pros to see their updates!</p>
             </div>
           ) : (
             <div className="space-y-4">
               {(feed || []).map(post => (
-                <FeedCard key={post.id} post={post} />
+                <SocialFeedCard key={post.id} post={post} />
               ))}
             </div>
           )}

@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { StatusBadge } from "@/components/StatusBadge";
-import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals } from "@/hooks/use-data";
+import { OpenChairToggle } from "@/components/OpenChairToggle";
+import { CreatePostSheet } from "@/components/CreatePostSheet";
+import { SocialFeedCard } from "@/components/SocialFeedCard";
+import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals, useFeed } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -17,6 +20,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { categoryLabels } from "@/lib/constants";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const statuses = [
   { value: "open-chair", emoji: "🪑", label: "Open Chair", desc: "Walk-ins welcome" },
@@ -27,15 +32,35 @@ const statuses = [
   { value: "offline", emoji: "💤", label: "Offline", desc: "Not working" },
 ] as const;
 
+function useMyPosts(proProfileId: string | undefined) {
+  return useQuery({
+    queryKey: ["myPosts", proProfileId],
+    queryFn: async () => {
+      if (!proProfileId) return [];
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("professional_profile_id", proProfileId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!proProfileId,
+  });
+}
+
 export default function ProDashboard() {
   const { profile } = useAuth();
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
   const { data: bookings } = useMyBookings("pro");
   const { data: reviews } = useReviewsForPro(proProfile?.id);
+  const { data: myPosts } = useMyPosts(proProfile?.id);
   const [statusNote, setStatusNote] = useState("");
   const [statusDuration, setStatusDuration] = useState("none");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   useRealtimeProfessionals();
 
@@ -55,7 +80,6 @@ export default function ProDashboard() {
         <Skeleton className="h-20 w-full rounded-xl" />
         <Skeleton className="h-40 w-full rounded-xl" />
         <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
       </div>
     );
   }
@@ -95,7 +119,6 @@ export default function ProDashboard() {
   const pendingBookings = allBookings.filter((b: any) => b.status === "pending");
   const confirmedBookings = allBookings.filter((b: any) => b.status === "confirmed");
   const completedBookings = allBookings.filter((b: any) => b.status === "completed");
-  const isAvailable = ["open-chair", "available-now", "last-minute"].includes(proProfile.status);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -115,11 +138,6 @@ export default function ProDashboard() {
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-[10px] text-muted-foreground">{categoryLabels[proProfile.category] || proProfile.category}</span>
                 {proProfile.city && <span className="text-[10px] text-muted-foreground">· {proProfile.city}</span>}
-                {Number(proProfile.average_rating) > 0 && (
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                    · <Star className="h-2.5 w-2.5 fill-accent text-accent" />{Number(proProfile.average_rating).toFixed(1)}
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -135,15 +153,32 @@ export default function ProDashboard() {
       </header>
 
       <div className="px-4 pt-4 space-y-5">
-        {/* Status Control — THE signature feature */}
+        {/* OPEN CHAIR TOGGLE — THE HERO */}
+        <OpenChairToggle currentStatus={proProfile.status} />
+
+        {/* Create Post CTA */}
+        <button
+          onClick={() => setPostSheetOpen(true)}
+          className="w-full flex items-center gap-3 rounded-2xl bg-card border border-border p-4 hover:border-primary/30 transition-colors text-left"
+        >
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+            {proProfile.avatar_url ? (
+              <img src={proProfile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="font-display font-bold text-primary text-sm">{displayName.charAt(0)}</span>
+            )}
+          </div>
+          <span className="text-sm text-muted-foreground flex-1">Share an update, promo, or photo...</span>
+          <PenSquare className="h-5 w-5 text-primary" />
+        </button>
+
+        {/* Status Control */}
         <section className="rounded-2xl bg-card border border-border p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-base">Your Status</h2>
+            <h2 className="font-display font-bold text-base">Status Details</h2>
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full text-xs h-7">
-                  Change
-                </Button>
+                <Button variant="outline" size="sm" className="rounded-full text-xs h-7">Change</Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-2xl">
                 <SheetHeader>
@@ -158,9 +193,7 @@ export default function ProDashboard() {
                         disabled={updateStatus.isPending}
                         className={cn(
                           "flex flex-col items-start gap-1 rounded-xl border p-3 transition-all text-left",
-                          proProfile.status === s.value
-                            ? "border-primary bg-primary/10 shadow-sm"
-                            : "border-border hover:border-primary/30"
+                          proProfile.status === s.value ? "border-primary bg-primary/10 shadow-sm" : "border-border hover:border-primary/30"
                         )}
                       >
                         <div className="flex items-center gap-2">
@@ -173,19 +206,12 @@ export default function ProDashboard() {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground">Status note</label>
-                    <Input
-                      placeholder="e.g. Walk-ins welcome, Cancellation at 2:15 PM"
-                      value={statusNote}
-                      onChange={e => setStatusNote(e.target.value)}
-                      className="mt-1 rounded-xl text-sm"
-                    />
+                    <Input placeholder="e.g. Walk-ins welcome" value={statusNote} onChange={e => setStatusNote(e.target.value)} className="mt-1 rounded-xl text-sm" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground">Auto-expire</label>
                     <Select value={statusDuration} onValueChange={setStatusDuration}>
-                      <SelectTrigger className="mt-1 rounded-xl text-sm">
-                        <SelectValue placeholder="No expiration" />
-                      </SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-xl text-sm"><SelectValue placeholder="No expiration" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">No expiration</SelectItem>
                         <SelectItem value="30m">30 minutes</SelectItem>
@@ -199,9 +225,7 @@ export default function ProDashboard() {
               </SheetContent>
             </Sheet>
           </div>
-
-          {/* Current status display */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3">
             <StatusBadge status={proProfile.status} size="md" pulse />
             {proProfile.status_expires_at && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
@@ -210,36 +234,9 @@ export default function ProDashboard() {
               </span>
             )}
           </div>
-
           {proProfile.status_note && (
-            <div className="rounded-xl bg-secondary p-2.5 mb-2">
+            <div className="rounded-xl bg-secondary p-2.5 mt-2">
               <p className="text-xs text-muted-foreground">📝 {proProfile.status_note}</p>
-            </div>
-          )}
-
-          {/* Quick status buttons */}
-          <div className="grid grid-cols-3 gap-2">
-            {statuses.slice(0, 3).map(s => (
-              <button
-                key={s.value}
-                onClick={() => handleStatusChange(s.value)}
-                disabled={updateStatus.isPending}
-                className={cn(
-                  "flex flex-col items-center gap-1 rounded-xl border p-2.5 transition-all",
-                  proProfile.status === s.value
-                    ? "border-primary bg-primary/10 shadow-sm"
-                    : "border-border hover:border-primary/30"
-                )}
-              >
-                <span className="text-lg">{s.emoji}</span>
-                <span className="text-[10px] font-medium">{s.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {isAvailable && (
-            <div className="mt-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5">
-              <p className="text-xs text-primary font-medium">✅ You're visible to nearby clients!</p>
             </div>
           )}
         </section>
@@ -250,7 +247,7 @@ export default function ProDashboard() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: Calendar, label: "Total bookings", value: allBookings.length.toString() },
-              { icon: Clock, label: "Pending requests", value: pendingBookings.length.toString() },
+              { icon: Clock, label: "Pending", value: pendingBookings.length.toString() },
               { icon: CheckCircle, label: "Completed", value: completedBookings.length.toString() },
               { icon: Users, label: "Followers", value: (proProfile.follower_count || 0).toString() },
             ].map(({ icon: Icon, label, value }) => (
@@ -299,39 +296,26 @@ export default function ProDashboard() {
           )}
         </section>
 
-        {/* Recent Reviews */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-base">Recent Reviews</h2>
-            {(reviews?.length || 0) > 0 && (
-              <span className="text-xs text-muted-foreground">{reviews?.length} total</span>
-            )}
-          </div>
-          {!reviews || reviews.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border p-6 text-center">
-              <Star className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No reviews yet</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {reviews.slice(0, 3).map((review: any) => (
-                <div key={review.id} className="rounded-xl border border-border bg-card p-3.5">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-semibold text-sm">{review.profiles?.full_name || "Client"}</p>
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={i} className="h-3 w-3 fill-accent text-accent" />
-                      ))}
-                    </div>
-                  </div>
-                  {review.review_text && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">{review.review_text}</p>
-                  )}
-                </div>
+        {/* My Posts Feed */}
+        {myPosts && myPosts.length > 0 && (
+          <section>
+            <h2 className="font-display font-bold text-base mb-3">Your Posts</h2>
+            <div className="space-y-4">
+              {myPosts.slice(0, 5).map((post: any) => (
+                <SocialFeedCard
+                  key={post.id}
+                  post={{
+                    ...post,
+                    pro_name: displayName,
+                    pro_avatar: proProfile.avatar_url,
+                    pro_category: proProfile.category,
+                    pro_status: proProfile.status,
+                  }}
+                />
               ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {/* Quick Actions */}
         <section>
@@ -358,6 +342,20 @@ export default function ProDashboard() {
           </div>
         </section>
       </div>
+
+      {/* FAB for creating post */}
+      <button
+        onClick={() => setPostSheetOpen(true)}
+        className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
+      <CreatePostSheet
+        open={postSheetOpen}
+        onOpenChange={setPostSheetOpen}
+        proProfileId={proProfile.id}
+      />
 
       <BottomNav role="pro" />
     </div>
