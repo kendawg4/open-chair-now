@@ -183,6 +183,7 @@ export default function ProProfile() {
           <div className="flex-1 pb-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h1 className="font-display text-xl font-bold truncate">{displayName}</h1>
+              <RoleBadge role="pro" size="md" />
               {pro.is_verified && <CheckCircle2 className="h-4 w-4 text-primary fill-primary/20 shrink-0" />}
             </div>
             <p className="text-sm text-muted-foreground">{categoryLabels[pro.category] || pro.category}</p>
