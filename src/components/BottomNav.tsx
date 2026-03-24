@@ -16,7 +16,7 @@ const proNav = [
   { to: "/pro/bookings", icon: Calendar, label: "Bookings" },
   { to: "/pro/services", icon: Scissors, label: "Services" },
   { to: "/pro/portfolio", icon: Image, label: "Portfolio" },
-  { to: "/pro/preview", icon: Eye, label: "Preview" },
+  { to: "/pro/my-profile", icon: User, label: "Profile" },
 ];
 
 interface BottomNavProps {
