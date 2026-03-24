@@ -25,10 +25,11 @@ import Discover from "./pages/client/Discover";
 import Search from "./pages/client/Search";
 import Favorites from "./pages/client/Favorites";
 import ClientProfile from "./pages/client/Profile";
+import ClientProfileEdit from "./pages/client/ProfileEdit";
 import ProProfile from "./pages/client/ProProfile";
 import ClientBookings from "./pages/client/Bookings";
 import ProDashboard from "./pages/pro/Dashboard";
-import ProfileEdit from "./pages/pro/ProfileEdit";
+import ProProfileEdit from "./pages/pro/ProfileEdit";
 import ProBookings from "./pages/pro/Bookings";
 import ProServices from "./pages/pro/Services";
 import ProPortfolio from "./pages/pro/Portfolio";
@@ -74,12 +75,13 @@ const App = () => (
             <Route path="/search" element={<ProtectedRoute allowedRoles={["client"]}><Search /></ProtectedRoute>} />
             <Route path="/favorites" element={<ProtectedRoute allowedRoles={["client"]}><Favorites /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRoles={["client"]}><ClientProfile /></ProtectedRoute>} />
+            <Route path="/profile/edit" element={<ProtectedRoute><ClientProfileEdit /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute allowedRoles={["client"]}><ClientBookings /></ProtectedRoute>} />
             <Route path="/pro/:id" element={<ProtectedRoute><ProProfile /></ProtectedRoute>} />
 
             {/* Professional */}
             <Route path="/pro/dashboard" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProDashboard /></ProtectedRoute>} />
-            <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProfileEdit /></ProtectedRoute>} />
+            <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProProfileEdit /></ProtectedRoute>} />
             <Route path="/pro/bookings" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProBookings /></ProtectedRoute>} />
             <Route path="/pro/services" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProServices /></ProtectedRoute>} />
             <Route path="/pro/portfolio" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPortfolio /></ProtectedRoute>} />

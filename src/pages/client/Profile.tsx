@@ -80,7 +80,10 @@ export default function ClientProfile() {
       {/* Cover gradient */}
       <div className="relative h-36 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <Link to="/profile/edit" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+            <Edit2 className="h-4 w-4" />
+          </Link>
           <Link to="/settings" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
             <Settings className="h-4 w-4" />
           </Link>
