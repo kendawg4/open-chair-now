@@ -261,18 +261,27 @@ export default function ProProfile() {
                 <p className="text-sm text-muted-foreground">No posts yet</p>
               </div>
             ) : (
-              posts!.map((post: any) => (
-                <SocialFeedCard
-                  key={post.id}
-                  post={{
-                    ...post,
-                    pro_name: displayName,
-                    pro_avatar: pro.avatar_url,
-                    pro_category: pro.category,
-                    pro_status: pro.status,
-                  }}
-                />
-              ))
+              [...posts!]
+                .sort((a: any, b: any) => {
+                  if (a.is_pinned && !b.is_pinned) return -1;
+                  if (!a.is_pinned && b.is_pinned) return 1;
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                })
+                .map((post: any) => (
+                  <SocialFeedCard
+                    key={post.id}
+                    post={{
+                      ...post,
+                      pro_name: displayName,
+                      pro_avatar: pro.avatar_url,
+                      pro_category: pro.category,
+                      pro_status: pro.status,
+                    }}
+                    isOwner={isOwnProfile}
+                    onPin={(postId) => pinPost.mutate(postId)}
+                    onUnpin={(postId) => unpinPost.mutate(postId)}
+                  />
+                ))
             )}
           </TabsContent>
 
