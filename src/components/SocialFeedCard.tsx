@@ -87,6 +87,9 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
       } else {
         await supabase.from("reposts").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
+      // Update repost_count on post
+      const newCount = newReposted ? repostCount + 1 : repostCount - 1;
+      await supabase.from("posts").update({ repost_count: Math.max(0, newCount) } as any).eq("id", post.id);
     } catch {
       setReposted(!newReposted);
       setRepostCount((prev: number) => newReposted ? prev - 1 : prev + 1);
