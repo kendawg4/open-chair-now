@@ -90,6 +90,7 @@ const App = () => (
             <Route path="/pro/portfolio" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPortfolio /></ProtectedRoute>} />
             <Route path="/pro/preview" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPreview /></ProtectedRoute>} />
             <Route path="/pro/my-profile" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProProfileSelf /></ProtectedRoute>} />
+            <Route path="/pro/followers/:id" element={<ProtectedRoute><FollowersPage /></ProtectedRoute>} />
 
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

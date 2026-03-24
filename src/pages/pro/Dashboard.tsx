@@ -277,12 +277,12 @@ function ProDashboardInner() {
           <h2 className="font-display font-bold text-base mb-3">Overview</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: Calendar, label: "Total bookings", value: allBookings.length.toString() },
-              { icon: Clock, label: "Pending", value: pendingBookings.length.toString() },
-              { icon: CheckCircle, label: "Completed", value: completedBookings.length.toString() },
-              { icon: Users, label: "Followers", value: (proProfile.follower_count || 0).toString() },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="rounded-xl bg-card border border-border p-3.5">
+              { icon: Calendar, label: "Total bookings", value: allBookings.length.toString(), to: "/pro/bookings" },
+              { icon: Clock, label: "Pending", value: pendingBookings.length.toString(), to: "/pro/bookings?tab=pending" },
+              { icon: CheckCircle, label: "Completed", value: completedBookings.length.toString(), to: "/pro/bookings?tab=completed" },
+              { icon: Users, label: "Followers", value: (proProfile.follower_count || 0).toString(), to: `/pro/followers/${proProfile.id}` },
+            ].map(({ icon: Icon, label, value, to }) => (
+              <Link key={label} to={to} className="rounded-xl bg-card border border-border p-3.5 hover:border-primary/30 transition-colors active:scale-[0.98]">
                 <div className="flex items-center gap-2 mb-1.5">
                   <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon className="h-4 w-4 text-primary" />
@@ -290,7 +290,7 @@ function ProDashboardInner() {
                 </div>
                 <p className="font-display font-bold text-xl">{value}</p>
                 <p className="text-[10px] text-muted-foreground">{label}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
