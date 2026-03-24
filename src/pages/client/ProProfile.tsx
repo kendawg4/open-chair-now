@@ -214,17 +214,42 @@ export default function ProProfile() {
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="mt-4 flex gap-2">
-          <Button
-            variant={isFollowing ? "outline" : "default"}
-            className="flex-1 rounded-full"
-            onClick={handleFollow}
+        {/* Owner: Open Chair Toggle */}
+        {isOwnProfile && (
+          <div className="mt-4">
+            <OpenChairToggle currentStatus={pro.status} />
+          </div>
+        )}
+
+        {/* Owner: Create Post CTA */}
+        {isOwnProfile && (
+          <button
+            onClick={() => setPostSheetOpen(true)}
+            className="mt-3 w-full flex items-center gap-3 rounded-2xl bg-card border border-border p-4 hover:border-primary/30 transition-colors text-left"
           >
-            <Users className="h-4 w-4 mr-1" />
-            {isFollowing ? "Following" : "Follow"}
-          </Button>
-          {!isOwnProfile && (
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+              {pro.avatar_url ? (
+                <img src={pro.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-display font-bold text-primary text-sm">{displayName.charAt(0)}</span>
+              )}
+            </div>
+            <span className="text-sm text-muted-foreground flex-1">Share an update, promo, or photo...</span>
+            <PenSquare className="h-5 w-5 text-primary" />
+          </button>
+        )}
+
+        {/* Action buttons - only for visitors */}
+        {!isOwnProfile && (
+          <div className="mt-4 flex gap-2">
+            <Button
+              variant={isFollowing ? "outline" : "default"}
+              className="flex-1 rounded-full"
+              onClick={handleFollow}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
             <Button
               variant="outline"
               className="rounded-full"
@@ -233,18 +258,33 @@ export default function ProProfile() {
             >
               <MessageCircle className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            variant="outline"
-            className="flex-1 rounded-full"
-            onClick={() => {
-              if (!user) { toast.error("Sign in to book"); return; }
-              setBookingOpen(true);
-            }}
-          >
-            {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Book"}
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full"
+              onClick={() => {
+                if (!user) { toast.error("Sign in to book"); return; }
+                setBookingOpen(true);
+              }}
+            >
+              {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Book"}
+            </Button>
+          </div>
+        )}
+
+        {/* Owner: Quick links */}
+        {isOwnProfile && (
+          <div className="mt-3 flex gap-2 flex-wrap">
+            <Link to="/pro/profile-edit" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Edit2 className="h-3.5 w-3.5" /> Edit Profile
+            </Link>
+            <Link to="/pro/services" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Scissors className="h-3.5 w-3.5" /> Manage Services
+            </Link>
+            <Link to="/pro/portfolio" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <ImageIcon className="h-3.5 w-3.5" /> Portfolio
+            </Link>
+          </div>
+        )}
 
         {/* Social links */}
         {(pro.instagram_url) && (
