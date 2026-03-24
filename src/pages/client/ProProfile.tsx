@@ -203,6 +203,16 @@ export default function ProProfile() {
             <Users className="h-4 w-4 mr-1" />
             {isFollowing ? "Following" : "Follow"}
           </Button>
+          {!isOwnProfile && (
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={handleMessage}
+              disabled={startConversation.isPending}
+            >
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="outline"
             className="flex-1 rounded-full"
