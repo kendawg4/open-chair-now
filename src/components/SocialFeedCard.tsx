@@ -137,9 +137,16 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+    <div className={cn("bg-card border rounded-2xl overflow-hidden", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border")}>
+      {/* Pinned indicator */}
+      {post.is_pinned && (
+        <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-primary font-medium">
+          <Pin className="h-3 w-3" /> Pinned
+        </div>
+      )}
       {/* Header */}
-      <Link to={`/pro/${post.professional_profile_id}`} className="flex items-center gap-3 p-4 pb-2">
+      <div className="flex items-center gap-3 p-4 pb-2">
+        <Link to={`/pro/${post.professional_profile_id}`} className="flex items-center gap-3 flex-1 min-w-0">
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
           {post.pro_avatar ? (
             <img src={post.pro_avatar} alt={post.pro_name || ""} className="h-full w-full object-cover" />
