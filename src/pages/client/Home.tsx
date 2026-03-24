@@ -30,9 +30,14 @@ export default function ClientHome() {
               <span>{profile?.city || "Nearby"}</span>
             </div>
           </div>
-          <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-            <Bell className="h-5 w-5" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/messages" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <MessageCircle className="h-5 w-5" />
+            </Link>
+            <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Bell className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </header>
 
