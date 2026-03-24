@@ -444,15 +444,30 @@ export default function ProProfile() {
         </Tabs>
       </div>
 
-      {/* Sticky book bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 z-50">
-        <Button size="lg" className="rounded-full w-full text-base font-semibold h-12" onClick={() => {
-          if (!user) { toast.error("Sign in to book an appointment"); return; }
-          setBookingOpen(true);
-        }}>
-          {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
-        </Button>
-      </div>
+      {/* Sticky book bar - only for visitors */}
+      {!isOwnProfile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 z-50">
+          <Button size="lg" className="rounded-full w-full text-base font-semibold h-12" onClick={() => {
+            if (!user) { toast.error("Sign in to book an appointment"); return; }
+            setBookingOpen(true);
+          }}>
+            {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
+          </Button>
+        </div>
+      )}
+
+      {/* Owner: FAB for creating post */}
+      {isOwnProfile && (
+        <button
+          onClick={() => setPostSheetOpen(true)}
+          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* Owner: Bottom nav */}
+      {isOwnProfile && <BottomNav role="pro" />}
 
       <BookingSheet
         open={bookingOpen}
@@ -461,6 +476,14 @@ export default function ProProfile() {
         proName={displayName}
         services={(pro.services || []) as any}
       />
+
+      {isOwnProfile && (
+        <CreatePostSheet
+          open={postSheetOpen}
+          onOpenChange={setPostSheetOpen}
+          proProfileId={pro.id}
+        />
+      )}
     </div>
   );
 }
