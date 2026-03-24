@@ -5,6 +5,7 @@ import { OpenChairToggle } from "@/components/OpenChairToggle";
 import { CreatePostSheet } from "@/components/CreatePostSheet";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals, useFeed, useRealtimeBookings } from "@/hooks/use-data";
+import { Skeleton as FeedSkeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
