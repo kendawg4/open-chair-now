@@ -85,6 +85,17 @@ export default function ClientHome() {
           </div>
         </section>
 
+        {/* Open Chairs Map */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display font-bold text-base">🪑 Open Chairs Near You</h2>
+            <Link to="/discover" className="flex items-center gap-0.5 text-xs text-primary font-medium">
+              Map <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <OpenChairsMap professionals={professionals || []} />
+        </section>
+
         {/* Map CTA */}
         <Link to="/discover" className="block rounded-2xl bg-primary/10 border border-primary/20 p-4">
           <div className="flex items-center gap-3">
