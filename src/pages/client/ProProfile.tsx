@@ -200,7 +200,7 @@ export default function ProProfile() {
 
         {/* Stats row */}
         <div className="mt-3 flex items-center gap-4 text-sm">
-          <span><strong>{pro.follower_count || 0}</strong> <span className="text-muted-foreground">followers</span></span>
+          <Link to={`/pro/followers/${pro.id}`} className="hover:underline"><strong>{pro.follower_count || 0}</strong> <span className="text-muted-foreground">followers</span></Link>
           <span><strong>{pro.total_reviews || 0}</strong> <span className="text-muted-foreground">reviews</span></span>
           <span className="flex items-center gap-0.5"><Star className="h-3.5 w-3.5 fill-accent text-accent" /><strong>{Number(pro.average_rating || 0).toFixed(1)}</strong></span>
         </div>

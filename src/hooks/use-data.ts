@@ -354,7 +354,6 @@ export function useToggleFavorite() {
   return useMutation({
     mutationFn: async (proProfileId: string) => {
       if (!profile) throw new Error("Not logged in");
-      // Check if exists
       const { data: existing } = await supabase
         .from("favorites")
         .select("id")
@@ -364,15 +363,27 @@ export function useToggleFavorite() {
 
       if (existing) {
         await supabase.from("favorites").delete().eq("id", existing.id);
+        return { action: "removed" as const, proProfileId };
       } else {
         await supabase.from("favorites").insert({
           client_profile_id: profile.id,
           professional_profile_id: proProfileId,
         });
+        return { action: "added" as const, proProfileId };
       }
     },
-    onSuccess: () => {
+    onMutate: async (proProfileId) => {
+      await queryClient.cancelQueries({ queryKey: ["isFavorite", profile?.id, proProfileId] });
+      const prev = queryClient.getQueryData(["isFavorite", profile?.id, proProfileId]);
+      queryClient.setQueryData(["isFavorite", profile?.id, proProfileId], !prev);
+      return { prev, proProfileId };
+    },
+    onError: (_err, _vars, context) => {
+      if (context) queryClient.setQueryData(["isFavorite", profile?.id, context.proProfileId], context.prev);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["isFavorite"] });
     },
   });
 }
@@ -412,16 +423,30 @@ export function useToggleFollow() {
 
       if (existing) {
         await supabase.from("follows").delete().eq("id", existing.id);
+        return { action: "unfollowed" as const, proProfileId };
       } else {
         await supabase.from("follows").insert({
           client_profile_id: profile.id,
           professional_profile_id: proProfileId,
         });
+        return { action: "followed" as const, proProfileId };
       }
     },
-    onSuccess: () => {
+    onMutate: async (proProfileId) => {
+      await queryClient.cancelQueries({ queryKey: ["isFollowing", profile?.id, proProfileId] });
+      const prev = queryClient.getQueryData(["isFollowing", profile?.id, proProfileId]);
+      queryClient.setQueryData(["isFollowing", profile?.id, proProfileId], !prev);
+      return { prev, proProfileId };
+    },
+    onError: (_err, _vars, context) => {
+      if (context) queryClient.setQueryData(["isFollowing", profile?.id, context.proProfileId], context.prev);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["follows"] });
+      queryClient.invalidateQueries({ queryKey: ["isFollowing"] });
       queryClient.invalidateQueries({ queryKey: ["professionals"] });
+      queryClient.invalidateQueries({ queryKey: ["professional"] });
+      queryClient.invalidateQueries({ queryKey: ["followers"] });
     },
   });
 }
