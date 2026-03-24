@@ -50,7 +50,9 @@ export function OpenChairToggle({ currentStatus, className }: OpenChairTogglePro
         disabled={updateStatus.isPending}
         className={cn(
           "scale-150 origin-right",
-          isOpen && "data-[state=checked]:bg-status-available"
+          isOpen
+            ? "data-[state=checked]:bg-status-available"
+            : "data-[state=unchecked]:bg-muted-foreground/30"
         )}
       />
     </div>
