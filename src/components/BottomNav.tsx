@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
