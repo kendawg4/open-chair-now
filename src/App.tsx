@@ -93,6 +93,8 @@ const App = () => (
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
+            <Route path="/messages/:id" element={<ProtectedRoute><ConversationPage /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
