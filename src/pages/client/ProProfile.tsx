@@ -100,6 +100,17 @@ export default function ProProfile() {
     if (id) toggleFollow.mutate(id);
   };
 
+  const handleMessage = async () => {
+    if (!user) { toast.error("Sign in to message"); return; }
+    if (!pro?.profile_id) return;
+    try {
+      const convId = await startConversation.mutateAsync(pro.profile_id);
+      navigate(`/messages/${convId}`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to start conversation");
+    }
+  };
+
   const handleShare = async () => {
     const url = window.location.href;
     if (navigator.share) {
