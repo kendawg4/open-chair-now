@@ -75,6 +75,7 @@ const App = () => (
             <Route path="/search" element={<ProtectedRoute allowedRoles={["client"]}><Search /></ProtectedRoute>} />
             <Route path="/favorites" element={<ProtectedRoute allowedRoles={["client"]}><Favorites /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRoles={["client"]}><ClientProfile /></ProtectedRoute>} />
+            <Route path="/profile/edit" element={<ProtectedRoute><ClientProfileEdit /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute allowedRoles={["client"]}><ClientBookings /></ProtectedRoute>} />
             <Route path="/pro/:id" element={<ProtectedRoute><ProProfile /></ProtectedRoute>} />
 
