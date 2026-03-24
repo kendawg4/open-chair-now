@@ -194,6 +194,45 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          profile_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          profile_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           client_profile_id: string
@@ -372,6 +411,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          comment_count: number | null
           content: string
           created_at: string
           id: string
@@ -379,8 +419,10 @@ export type Database = {
           likes_count: number | null
           post_type: Database["public"]["Enums"]["post_type"]
           professional_profile_id: string
+          repost_count: number | null
         }
         Insert: {
+          comment_count?: number | null
           content: string
           created_at?: string
           id?: string
@@ -388,8 +430,10 @@ export type Database = {
           likes_count?: number | null
           post_type?: Database["public"]["Enums"]["post_type"]
           professional_profile_id: string
+          repost_count?: number | null
         }
         Update: {
+          comment_count?: number | null
           content?: string
           created_at?: string
           id?: string
@@ -397,6 +441,7 @@ export type Database = {
           likes_count?: number | null
           post_type?: Database["public"]["Enums"]["post_type"]
           professional_profile_id?: string
+          repost_count?: number | null
         }
         Relationships: [
           {
@@ -662,6 +707,42 @@ export type Database = {
           {
             foreignKeyName: "reports_reporter_profile_id_fkey"
             columns: ["reporter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reposts: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reposts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reposts_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
