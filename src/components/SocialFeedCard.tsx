@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { categoryLabels } from "@/lib/constants";
 import { Heart, MessageCircle, Repeat2, Share2, Send, Pin, PinOff } from "lucide-react";
+import { RoleBadge } from "./RoleBadge";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,7 +163,8 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-display font-semibold text-sm">{post.pro_name || "Professional"}</span>
+             <span className="font-display font-semibold text-sm">{post.pro_name || "Professional"}</span>
+             <RoleBadge role="pro" />
             {post.pro_status && <StatusBadge status={post.pro_status} size="sm" />}
           </div>
           <p className="text-xs text-muted-foreground">

@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import { Settings, ChevronRight, Heart, Calendar, Star, Bell, LogOut, Scissors, MapPin, Edit2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { RoleBadge } from "@/components/RoleBadge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -103,7 +104,10 @@ export default function ClientProfile() {
             )}
           </div>
 
-          <h1 className="font-display text-xl font-bold mt-3">{displayName}</h1>
+          <div className="flex items-center gap-1.5 mt-3">
+            <h1 className="font-display text-xl font-bold">{displayName}</h1>
+            <RoleBadge role={(role === "professional" || role === "shop_owner") ? "pro" : "client"} size="md" />
+          </div>
 
           {locationParts.length > 0 && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">

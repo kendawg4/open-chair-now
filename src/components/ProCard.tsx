@@ -1,4 +1,5 @@
 import { StatusBadge } from "./StatusBadge";
+import { RoleBadge } from "./RoleBadge";
 import { categoryLabels } from "@/lib/constants";
 import { Star, MapPin, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -40,7 +41,7 @@ export function ProCard({ pro, variant = "full" }: ProCardProps) {
           )} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-display font-semibold text-sm truncate">{displayName}</p>
+          <p className="font-display font-semibold text-sm truncate flex items-center gap-1">{displayName} <RoleBadge role="pro" /></p>
           <p className="text-xs text-muted-foreground">{categoryLabels[pro.category] || pro.category} · {pro.city || "Nearby"}</p>
         </div>
         <StatusBadge status={pro.status} size="sm" />
@@ -81,7 +82,7 @@ export function ProCard({ pro, variant = "full" }: ProCardProps) {
               )}
             </div>
             <div>
-              <h3 className="font-display font-semibold text-sm">{displayName}</h3>
+              <h3 className="font-display font-semibold text-sm flex items-center gap-1">{displayName} <RoleBadge role="pro" /></h3>
               <p className="text-xs text-muted-foreground">{categoryLabels[pro.category] || pro.category}</p>
             </div>
           </div>

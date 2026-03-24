@@ -5,6 +5,7 @@ import { OpenChairToggle } from "@/components/OpenChairToggle";
 import { CreatePostSheet } from "@/components/CreatePostSheet";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { useMyProProfile, useUpdateStatus, useMyBookings, useReviewsForPro, useRealtimeProfessionals, useFeed, useRealtimeBookings } from "@/hooks/use-data";
+import { Skeleton as FeedSkeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,35 @@ function useMyPosts(proProfileId: string | undefined) {
 }
 
 export default function ProDashboard() {
+  return <ProDashboardInner />;
+}
+
+function ActivityFeedSection() {
+  const { data: feed, isLoading } = useFeed();
+  if (isLoading) {
+    return (
+      <section>
+        <h2 className="font-display font-bold text-base mb-3">Activity Feed</h2>
+        <div className="space-y-4">
+          {[1, 2].map(i => <FeedSkeleton key={i} className="h-40 rounded-2xl" />)}
+        </div>
+      </section>
+    );
+  }
+  if (!feed || feed.length === 0) return null;
+  return (
+    <section>
+      <h2 className="font-display font-bold text-base mb-3">Activity Feed</h2>
+      <div className="space-y-4">
+        {feed.slice(0, 10).map((post: any) => (
+          <SocialFeedCard key={post.id} post={post} isLiked={post._isLiked} isReposted={post._isReposted} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProDashboardInner() {
   const { profile } = useAuth();
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
@@ -296,6 +326,9 @@ export default function ProDashboard() {
             </div>
           )}
         </section>
+
+        {/* Activity Feed — posts from followed pros + trending */}
+        <ActivityFeedSection />
 
         {/* My Posts Feed */}
         {myPosts && myPosts.length > 0 && (
