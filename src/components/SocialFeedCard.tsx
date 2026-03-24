@@ -34,7 +34,7 @@ interface SocialFeedCardProps {
   onUnpin?: (postId: string) => void;
 }
 
-export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted }: SocialFeedCardProps) {
+export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, onPin, onUnpin }: SocialFeedCardProps) {
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
   const [liked, setLiked] = useState(initialLiked || false);
