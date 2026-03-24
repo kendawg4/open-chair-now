@@ -3,14 +3,17 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow, useTogglePinPost, useUnpinPost } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
+import { OpenChairToggle } from "@/components/OpenChairToggle";
+import { CreatePostSheet } from "@/components/CreatePostSheet";
 import { categoryLabels } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper, MessageCircle } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Heart, Clock, CheckCircle2, Briefcase, Instagram, Globe, Users, ImageIcon, Scissors, Grid3X3, Newspaper, MessageCircle, Edit2, PenSquare, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { BookingSheet } from "@/components/BookingSheet";
+import { BottomNav } from "@/components/BottomNav";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -51,6 +54,7 @@ export default function ProProfile() {
   const unpinPost = useUnpinPost();
   const startConversation = useStartConversation();
   const isOwnProfile = proProfileId === id;
+  const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -132,16 +136,33 @@ export default function ProProfile() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Link to="/home" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          {isOwnProfile ? (
+            <div />
+          ) : (
+            <Link to="/home" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          )}
           <div className="flex gap-2">
-            <button onClick={handleShare} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-              <Globe className="h-4 w-4" />
-            </button>
-            <button onClick={handleFavorite} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
-              <Heart className={cn("h-4 w-4 transition-colors", isFav && "fill-destructive text-destructive")} />
-            </button>
+            {isOwnProfile ? (
+              <>
+                <Link to="/pro/profile-edit" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Edit2 className="h-4 w-4" />
+                </Link>
+                <Link to="/settings" className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <button onClick={handleShare} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Globe className="h-4 w-4" />
+                </button>
+                <button onClick={handleFavorite} className="h-9 w-9 rounded-full glass flex items-center justify-center backdrop-blur-md">
+                  <Heart className={cn("h-4 w-4 transition-colors", isFav && "fill-destructive text-destructive")} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -193,17 +214,42 @@ export default function ProProfile() {
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="mt-4 flex gap-2">
-          <Button
-            variant={isFollowing ? "outline" : "default"}
-            className="flex-1 rounded-full"
-            onClick={handleFollow}
+        {/* Owner: Open Chair Toggle */}
+        {isOwnProfile && (
+          <div className="mt-4">
+            <OpenChairToggle currentStatus={pro.status} />
+          </div>
+        )}
+
+        {/* Owner: Create Post CTA */}
+        {isOwnProfile && (
+          <button
+            onClick={() => setPostSheetOpen(true)}
+            className="mt-3 w-full flex items-center gap-3 rounded-2xl bg-card border border-border p-4 hover:border-primary/30 transition-colors text-left"
           >
-            <Users className="h-4 w-4 mr-1" />
-            {isFollowing ? "Following" : "Follow"}
-          </Button>
-          {!isOwnProfile && (
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+              {pro.avatar_url ? (
+                <img src={pro.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-display font-bold text-primary text-sm">{displayName.charAt(0)}</span>
+              )}
+            </div>
+            <span className="text-sm text-muted-foreground flex-1">Share an update, promo, or photo...</span>
+            <PenSquare className="h-5 w-5 text-primary" />
+          </button>
+        )}
+
+        {/* Action buttons - only for visitors */}
+        {!isOwnProfile && (
+          <div className="mt-4 flex gap-2">
+            <Button
+              variant={isFollowing ? "outline" : "default"}
+              className="flex-1 rounded-full"
+              onClick={handleFollow}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
             <Button
               variant="outline"
               className="rounded-full"
@@ -212,18 +258,33 @@ export default function ProProfile() {
             >
               <MessageCircle className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            variant="outline"
-            className="flex-1 rounded-full"
-            onClick={() => {
-              if (!user) { toast.error("Sign in to book"); return; }
-              setBookingOpen(true);
-            }}
-          >
-            {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Book"}
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full"
+              onClick={() => {
+                if (!user) { toast.error("Sign in to book"); return; }
+                setBookingOpen(true);
+              }}
+            >
+              {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Book"}
+            </Button>
+          </div>
+        )}
+
+        {/* Owner: Quick links */}
+        {isOwnProfile && (
+          <div className="mt-3 flex gap-2 flex-wrap">
+            <Link to="/pro/profile-edit" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Edit2 className="h-3.5 w-3.5" /> Edit Profile
+            </Link>
+            <Link to="/pro/services" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <Scissors className="h-3.5 w-3.5" /> Manage Services
+            </Link>
+            <Link to="/pro/portfolio" className="h-8 px-3 rounded-full bg-card border border-border flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <ImageIcon className="h-3.5 w-3.5" /> Portfolio
+            </Link>
+          </div>
+        )}
 
         {/* Social links */}
         {(pro.instagram_url) && (
@@ -383,15 +444,30 @@ export default function ProProfile() {
         </Tabs>
       </div>
 
-      {/* Sticky book bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 z-50">
-        <Button size="lg" className="rounded-full w-full text-base font-semibold h-12" onClick={() => {
-          if (!user) { toast.error("Sign in to book an appointment"); return; }
-          setBookingOpen(true);
-        }}>
-          {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
-        </Button>
-      </div>
+      {/* Sticky book bar - only for visitors */}
+      {!isOwnProfile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 z-50">
+          <Button size="lg" className="rounded-full w-full text-base font-semibold h-12" onClick={() => {
+            if (!user) { toast.error("Sign in to book an appointment"); return; }
+            setBookingOpen(true);
+          }}>
+            {["open-chair", "available-now"].includes(pro.status) ? "⚡ Book Now" : "Request Appointment"}
+          </Button>
+        </div>
+      )}
+
+      {/* Owner: FAB for creating post */}
+      {isOwnProfile && (
+        <button
+          onClick={() => setPostSheetOpen(true)}
+          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* Owner: Bottom nav */}
+      {isOwnProfile && <BottomNav role="pro" />}
 
       <BookingSheet
         open={bookingOpen}
@@ -400,6 +476,14 @@ export default function ProProfile() {
         proName={displayName}
         services={(pro.services || []) as any}
       />
+
+      {isOwnProfile && (
+        <CreatePostSheet
+          open={postSheetOpen}
+          onOpenChange={setPostSheetOpen}
+          proProfileId={pro.id}
+        />
+      )}
     </div>
   );
 }
