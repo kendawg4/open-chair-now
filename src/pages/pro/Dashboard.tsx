@@ -63,6 +63,7 @@ export default function ProDashboard() {
   const [postSheetOpen, setPostSheetOpen] = useState(false);
 
   useRealtimeProfessionals();
+  useRealtimeBookings();
 
   const statusExpiresAt = useMemo(() => {
     if (statusDuration === "none") return null;
