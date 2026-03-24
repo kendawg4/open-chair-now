@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { categoryLabels } from "@/lib/constants";
-import { Heart, MessageCircle, Repeat2, Share2, Send } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, Share2, Send, Pin, PinOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
