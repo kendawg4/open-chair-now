@@ -1,6 +1,3 @@
-# Memory: index.md
-Updated: now
-
 OpenChair - real-time beauty services discovery & booking marketplace
 
 ## Design System
@@ -20,6 +17,7 @@ OpenChair - real-time beauty services discovery & booking marketplace
 - posts table has is_pinned column for featured posts
 - conversations/messages tables for DMs with realtime
 - DB trigger notify_followers_open_chair auto-creates notifications when pro goes open-chair
+- Realtime enabled on: professional_profiles, messages, bookings
 
 ## Phase Status
 - Phase 1 (UI scaffold): ✅
@@ -28,3 +26,7 @@ OpenChair - real-time beauty services discovery & booking marketplace
 - Open Chairs Map: ✅ Leaflet-based map on home page
 - Pinned posts: ✅ pros can pin one post to top of profile
 - Activity feed: ✅ prioritizes followed pros + trending by engagement
+- Post interactions: ✅ likes/comments/reposts persist to DB with count updates
+- Feed shows isLiked/isReposted state per user
+- Booking flow: ✅ end-to-end with realtime updates
+- All UI uses live Supabase data, no mock data in production code
