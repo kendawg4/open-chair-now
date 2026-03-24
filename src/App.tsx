@@ -81,7 +81,7 @@ const App = () => (
 
             {/* Professional */}
             <Route path="/pro/dashboard" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProDashboard /></ProtectedRoute>} />
-            <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProfileEdit /></ProtectedRoute>} />
+            <Route path="/pro/profile-edit" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProProfileEdit /></ProtectedRoute>} />
             <Route path="/pro/bookings" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProBookings /></ProtectedRoute>} />
             <Route path="/pro/services" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProServices /></ProtectedRoute>} />
             <Route path="/pro/portfolio" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPortfolio /></ProtectedRoute>} />
