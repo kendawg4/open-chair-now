@@ -25,9 +25,13 @@ interface SocialFeedCardProps {
     pro_avatar?: string | null;
     pro_category?: string;
     pro_status?: string;
+    is_pinned?: boolean;
   };
   isLiked?: boolean;
   isReposted?: boolean;
+  isOwner?: boolean;
+  onPin?: (postId: string) => void;
+  onUnpin?: (postId: string) => void;
 }
 
 export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted }: SocialFeedCardProps) {
