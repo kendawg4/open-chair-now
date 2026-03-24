@@ -163,7 +163,17 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
             {post.pro_category ? categoryLabels[post.pro_category] || post.pro_category : ""} · {timeAgo(post.created_at)}
           </p>
         </div>
-      </Link>
+        </Link>
+        {isOwner && (
+          <button
+            onClick={() => post.is_pinned ? onUnpin?.(post.id) : onPin?.(post.id)}
+            className="text-muted-foreground hover:text-primary transition-colors shrink-0"
+            title={post.is_pinned ? "Unpin" : "Pin to profile"}
+          >
+            {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
 
       {/* Content */}
       <p className="px-4 pb-3 text-sm leading-relaxed">{post.content}</p>

@@ -446,22 +446,91 @@ export function useIsFollowing(proProfileId: string | undefined) {
 
 // ===== POSTS / FEED =====
 export function useFeed() {
+  const { profile } = useAuth();
   return useQuery({
-    queryKey: ["feed"],
+    queryKey: ["feed", profile?.id],
     queryFn: async () => {
+      // Get IDs of followed pros
+      let followedIds: string[] = [];
+      if (profile) {
+        const { data: follows } = await supabase
+          .from("follows")
+          .select("professional_profile_id")
+          .eq("client_profile_id", profile.id);
+        followedIds = (follows || []).map((f: any) => f.professional_profile_id);
+      }
+
+      // Fetch posts — all recent, we'll sort client-side
       const { data, error } = await supabase
         .from("posts")
         .select(`*, professional_profiles(*, profiles!inner(full_name, avatar_url))`)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(50);
       if (error) throw error;
-      return (data || []).map((post: any) => ({
+
+      const mapped = (data || []).map((post: any) => ({
         ...post,
         pro_name: post.professional_profiles?.profiles?.full_name || "",
         pro_avatar: post.professional_profiles?.profiles?.avatar_url,
         pro_category: post.professional_profiles?.category,
         pro_status: post.professional_profiles?.status,
+        _isFollowed: followedIds.includes(post.professional_profile_id),
+        _score: (post.likes_count || 0) + (post.comment_count || 0) * 2 + (post.repost_count || 0) * 3,
       }));
+
+      // Sort: followed first, then by engagement score, then recency
+      mapped.sort((a: any, b: any) => {
+        if (a._isFollowed && !b._isFollowed) return -1;
+        if (!a._isFollowed && b._isFollowed) return 1;
+        if (a._score !== b._score) return b._score - a._score;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      return mapped;
+    },
+  });
+}
+
+// ===== PIN POST =====
+export function useTogglePinPost() {
+  const queryClient = useQueryClient();
+  const { proProfileId } = useAuth();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!proProfileId) throw new Error("No pro profile");
+      // Unpin all first
+      await supabase
+        .from("posts")
+        .update({ is_pinned: false } as any)
+        .eq("professional_profile_id", proProfileId);
+      // Pin selected
+      await supabase
+        .from("posts")
+        .update({ is_pinned: true } as any)
+        .eq("id", postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["myPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["proPosts"] });
+    },
+  });
+}
+
+export function useUnpinPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      await supabase
+        .from("posts")
+        .update({ is_pinned: false } as any)
+        .eq("id", postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["myPosts"] });
+      queryClient.invalidateQueries({ queryKey: ["proPosts"] });
     },
   });
 }
