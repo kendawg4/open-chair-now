@@ -33,6 +33,7 @@ import ProBookings from "./pages/pro/Bookings";
 import ProServices from "./pages/pro/Services";
 import ProPortfolio from "./pages/pro/Portfolio";
 import ProPreview from "./pages/pro/Preview";
+import ProProfileSelf from "./pages/pro/ProfileSelf";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/pro/services" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProServices /></ProtectedRoute>} />
             <Route path="/pro/portfolio" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPortfolio /></ProtectedRoute>} />
             <Route path="/pro/preview" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProPreview /></ProtectedRoute>} />
+            <Route path="/pro/my-profile" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProProfileSelf /></ProtectedRoute>} />
 
             {/* Shared */}
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

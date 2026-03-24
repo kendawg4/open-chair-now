@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Eye, Scissors } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -16,7 +16,7 @@ const proNav = [
   { to: "/pro/bookings", icon: Calendar, label: "Bookings" },
   { to: "/pro/services", icon: Scissors, label: "Services" },
   { to: "/pro/portfolio", icon: Image, label: "Portfolio" },
-  { to: "/pro/preview", icon: Eye, label: "Preview" },
+  { to: "/pro/my-profile", icon: User, label: "Profile" },
 ];
 
 interface BottomNavProps {
