@@ -82,7 +82,7 @@ export function ProCard({ pro, variant = "full" }: ProCardProps) {
               )}
             </div>
             <div>
-              <h3 className="font-display font-semibold text-sm">{displayName}</h3>
+              <h3 className="font-display font-semibold text-sm flex items-center gap-1">{displayName} <RoleBadge role="pro" /></h3>
               <p className="text-xs text-muted-foreground">{categoryLabels[pro.category] || pro.category}</p>
             </div>
           </div>
