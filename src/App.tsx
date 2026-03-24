@@ -38,6 +38,8 @@ import ProProfileSelf from "./pages/pro/ProfileSelf";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
+import Inbox from "./pages/messages/Inbox";
+import ConversationPage from "./pages/messages/Conversation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
