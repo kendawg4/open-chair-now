@@ -1,7 +1,7 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useMyBookings, useUpdateBookingStatus } from "@/hooks/use-data";
 import { ArrowLeft, Calendar, Clock, Check, X, CheckCircle2, Ban } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +20,8 @@ const statusColors: Record<string, string> = {
 export default function ProBookings() {
   const { data: bookings, isLoading } = useMyBookings("pro");
   const updateStatus = useUpdateBookingStatus();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "pending";
 
   const pending = bookings?.filter((b: any) => b.status === "pending") || [];
   const confirmed = bookings?.filter((b: any) => b.status === "confirmed") || [];
@@ -106,7 +108,7 @@ export default function ProBookings() {
         {isLoading ? (
           <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
         ) : (
-          <Tabs defaultValue="pending" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="w-full grid grid-cols-4 mb-4">
               <TabsTrigger value="pending" className="text-xs">Pending ({pending.length})</TabsTrigger>
               <TabsTrigger value="confirmed" className="text-xs">Active ({confirmed.length})</TabsTrigger>
