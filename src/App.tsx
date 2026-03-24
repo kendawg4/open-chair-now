@@ -35,6 +35,7 @@ import ProServices from "./pages/pro/Services";
 import ProPortfolio from "./pages/pro/Portfolio";
 import ProPreview from "./pages/pro/Preview";
 import ProProfileSelf from "./pages/pro/ProfileSelf";
+import FollowersPage from "./pages/pro/Followers";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/Dashboard";
