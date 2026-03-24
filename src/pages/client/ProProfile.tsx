@@ -36,9 +36,10 @@ function useProPosts(proProfileId: string | undefined) {
 
 export default function ProProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("posts");
-  const { user } = useAuth();
+  const { user, profile: myProfile, proProfileId } = useAuth();
   const { data: pro, isLoading } = useProfessionalById(id);
   const { data: reviews } = useReviewsForPro(id);
   const { data: posts } = useProPosts(id);
@@ -46,6 +47,10 @@ export default function ProProfile() {
   const { data: isFollowing } = useIsFollowing(id);
   const toggleFav = useToggleFavorite();
   const toggleFollow = useToggleFollow();
+  const pinPost = useTogglePinPost();
+  const unpinPost = useUnpinPost();
+  const startConversation = useStartConversation();
+  const isOwnProfile = proProfileId === id;
 
   if (isLoading) {
     return (
