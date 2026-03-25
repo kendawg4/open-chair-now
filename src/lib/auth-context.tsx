@@ -22,6 +22,9 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   role: AppRole | null;
+  roles: AppRole[];
+  isPro: boolean;
+  isClient: boolean;
   proProfileId: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
