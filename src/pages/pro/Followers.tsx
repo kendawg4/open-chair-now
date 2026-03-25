@@ -12,17 +12,36 @@ function useFollowers(proProfileId: string | undefined) {
     queryKey: ["followers", proProfileId],
     queryFn: async () => {
       if (!proProfileId) return [];
+      // Get followers with their profile info
       const { data, error } = await supabase
         .from("follows")
-        .select("*, profiles:client_profile_id(id, full_name, display_name, avatar_url)")
+        .select("*, profiles:client_profile_id(id, user_id, full_name, display_name, avatar_url)")
         .eq("professional_profile_id", proProfileId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []).map((f: any) => ({
+
+      // Check which followers are pros
+      const followerProfiles = (data || []).map((f: any) => ({
         id: f.profiles?.id,
+        user_id: f.profiles?.user_id,
         full_name: f.profiles?.full_name || "User",
         display_name: f.profiles?.display_name,
         avatar_url: f.profiles?.avatar_url,
+      }));
+
+      // Fetch pro profile ids for followers who are also professionals
+      const profileIds = followerProfiles.map((f: any) => f.id).filter(Boolean);
+      const { data: proProfiles } = await supabase
+        .from("professional_profiles")
+        .select("id, profile_id")
+        .in("profile_id", profileIds.length > 0 ? profileIds : ["__none__"]);
+
+      const proMap = new Map((proProfiles || []).map((p: any) => [p.profile_id, p.id]));
+
+      return followerProfiles.map((f: any) => ({
+        ...f,
+        proProfileId: proMap.get(f.id) || null,
+        isPro: proMap.has(f.id),
       }));
     },
     enabled: !!proProfileId,
@@ -53,23 +72,30 @@ export default function FollowersPage() {
             <p className="mt-1 text-xs text-muted-foreground">Followers will appear here as people follow this profile.</p>
           </div>
         ) : (
-          followers.map((f: any) => (
-            <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
-                {f.avatar_url ? (
-                  <img src={f.avatar_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-sm font-bold text-primary">{(f.display_name || f.full_name).charAt(0)}</span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="font-semibold text-sm truncate">{f.display_name || f.full_name}</p>
-                  <RoleBadge role="client" size="sm" />
+          followers.map((f: any) => {
+            const profileLink = f.isPro ? `/pro/${f.proProfileId}` : `/profile/${f.id}`;
+            return (
+              <Link
+                key={f.id}
+                to={profileLink}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:border-primary/30 transition-colors"
+              >
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+                  {f.avatar_url ? (
+                    <img src={f.avatar_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-bold text-primary">{(f.display_name || f.full_name).charAt(0)}</span>
+                  )}
                 </div>
-              </div>
-            </div>
-          ))
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-semibold text-sm truncate">{f.display_name || f.full_name}</p>
+                    <RoleBadge role={f.isPro ? "pro" : "client"} size="sm" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })
         )}
       </div>
 

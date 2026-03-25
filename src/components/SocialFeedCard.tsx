@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StatusBadge } from "./StatusBadge";
 import { categoryLabels } from "@/lib/constants";
 import { Heart, MessageCircle, Repeat2, Share2, Send, Pin, PinOff } from "lucide-react";
@@ -46,6 +46,12 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [commentCount, setCommentCount] = useState(post.comment_count || 0);
+
+  // Sync initial liked/reposted state from props
+  useEffect(() => { setLiked(initialLiked || false); }, [initialLiked]);
+  useEffect(() => { setReposted(initialReposted || false); }, [initialReposted]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -58,21 +64,68 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
 
   const handleLike = async () => {
     if (!user || !profile) { toast.error("Sign in to like"); return; }
+    if (likeLoading) return; // Prevent double-tap
+    setLikeLoading(true);
     const newLiked = !liked;
     setLiked(newLiked);
     setLikesCount(prev => newLiked ? prev + 1 : prev - 1);
     try {
       if (newLiked) {
-        await supabase.from("post_likes").insert({ post_id: post.id, profile_id: profile.id });
+        // Use upsert-like behavior: check if already liked first
+        const { data: existing } = await supabase
+          .from("post_likes")
+          .select("id")
+          .eq("post_id", post.id)
+          .eq("profile_id", profile.id)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from("post_likes").insert({ post_id: post.id, profile_id: profile.id });
+          // Create notification for post owner
+          const { data: postData } = await supabase
+            .from("posts")
+            .select("professional_profile_id")
+            .eq("id", post.id)
+            .single();
+          if (postData) {
+            const { data: proProfile } = await supabase
+              .from("professional_profiles")
+              .select("profile_id")
+              .eq("id", postData.professional_profile_id)
+              .single();
+            if (proProfile) {
+              const { data: ownerProfile } = await supabase
+                .from("profiles")
+                .select("user_id")
+                .eq("id", proProfile.profile_id)
+                .single();
+              if (ownerProfile && ownerProfile.user_id !== user.id) {
+                await supabase.from("notifications").insert({
+                  user_id: ownerProfile.user_id,
+                  type: "post_like",
+                  title: `${profile.display_name || profile.full_name} liked your post`,
+                  body: post.content.substring(0, 100),
+                  related_entity_id: post.id,
+                });
+              }
+            }
+          }
+        }
       } else {
         await supabase.from("post_likes").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
-      // Update post likes_count
-      const newCount = newLiked ? likesCount + 1 : likesCount - 1;
-      await supabase.from("posts").update({ likes_count: Math.max(0, newCount) } as any).eq("id", post.id);
+      // Update post likes_count from actual count
+      const { count } = await supabase
+        .from("post_likes")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", post.id);
+      const actualCount = count || 0;
+      setLikesCount(actualCount);
+      await supabase.from("posts").update({ likes_count: actualCount } as any).eq("id", post.id);
     } catch {
       setLiked(!newLiked);
       setLikesCount(prev => newLiked ? prev - 1 : prev + 1);
+    } finally {
+      setLikeLoading(false);
     }
   };
 
@@ -83,14 +136,26 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
     setRepostCount((prev: number) => newReposted ? prev + 1 : prev - 1);
     try {
       if (newReposted) {
-        await supabase.from("reposts").insert({ post_id: post.id, profile_id: profile.id });
-        toast.success("Reposted!");
+        const { data: existing } = await supabase
+          .from("reposts")
+          .select("id")
+          .eq("post_id", post.id)
+          .eq("profile_id", profile.id)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from("reposts").insert({ post_id: post.id, profile_id: profile.id });
+          toast.success("Reposted!");
+        }
       } else {
         await supabase.from("reposts").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
-      // Update repost_count on post
-      const newCount = newReposted ? repostCount + 1 : repostCount - 1;
-      await supabase.from("posts").update({ repost_count: Math.max(0, newCount) } as any).eq("id", post.id);
+      const { count } = await supabase
+        .from("reposts")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", post.id);
+      const actualCount = count || 0;
+      setRepostCount(actualCount);
+      await supabase.from("posts").update({ repost_count: actualCount } as any).eq("id", post.id);
     } catch {
       setReposted(!newReposted);
       setRepostCount((prev: number) => newReposted ? prev - 1 : prev + 1);
@@ -101,13 +166,36 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
     setLoadingComments(true);
     const { data } = await supabase
       .from("comments")
-      .select("*, profiles:profile_id(full_name, avatar_url)")
+      .select("*, profiles:profile_id(id, full_name, display_name, avatar_url)")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true })
-      .limit(20);
+      .limit(50);
     setComments(data || []);
+    setCommentCount(data?.length || 0);
     setLoadingComments(false);
   };
+
+  // Load preview comments on mount
+  useEffect(() => {
+    const loadPreview = async () => {
+      const { data } = await supabase
+        .from("comments")
+        .select("*, profiles:profile_id(id, full_name, display_name, avatar_url)")
+        .eq("post_id", post.id)
+        .order("created_at", { ascending: false })
+        .limit(2);
+      if (data && data.length > 0) {
+        setComments(data.reverse());
+      }
+      // Get accurate count
+      const { count } = await supabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", post.id);
+      setCommentCount(count || 0);
+    };
+    loadPreview();
+  }, [post.id]);
 
   const toggleComments = () => {
     const next = !showComments;
@@ -123,8 +211,43 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         profile_id: profile.id,
         content: commentText.trim(),
       });
-      // Update comment_count on the post
-      await supabase.from("posts").update({ comment_count: (post.comment_count || 0) + comments.length + 1 } as any).eq("id", post.id);
+      // Create notification for post owner
+      const { data: postData } = await supabase
+        .from("posts")
+        .select("professional_profile_id")
+        .eq("id", post.id)
+        .single();
+      if (postData) {
+        const { data: proProfile } = await supabase
+          .from("professional_profiles")
+          .select("profile_id")
+          .eq("id", postData.professional_profile_id)
+          .single();
+        if (proProfile) {
+          const { data: ownerProfile } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .eq("id", proProfile.profile_id)
+            .single();
+          if (ownerProfile && ownerProfile.user_id !== user?.id) {
+            await supabase.from("notifications").insert({
+              user_id: ownerProfile.user_id,
+              type: "post_comment",
+              title: `${profile.display_name || profile.full_name} commented on your post`,
+              body: commentText.trim().substring(0, 100),
+              related_entity_id: post.id,
+            });
+          }
+        }
+      }
+      // Update comment_count from actual count
+      const { count } = await supabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", post.id);
+      const actualCount = count || 0;
+      setCommentCount(actualCount);
+      await supabase.from("posts").update({ comment_count: actualCount } as any).eq("id", post.id);
       setCommentText("");
       loadComments();
       queryClient.invalidateQueries({ queryKey: ["feed"] });
@@ -190,9 +313,39 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         <img src={post.image_url} alt="" className="w-full aspect-square object-cover" />
       )}
 
+      {/* Comment preview (always visible if comments exist) */}
+      {!showComments && comments.length > 0 && (
+        <div className="px-4 pb-2 space-y-1.5">
+          {comments.slice(0, 2).map((c: any) => (
+            <div key={c.id} className="flex gap-1.5 items-start">
+              <Link to={c.profiles?.id ? `/profile/${c.profiles.id}` : "#"} className="shrink-0">
+                <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                  {c.profiles?.avatar_url ? (
+                    <img src={c.profiles.avatar_url} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-[8px] font-bold text-primary">{(c.profiles?.full_name || "?").charAt(0)}</span>
+                  )}
+                </div>
+              </Link>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                <Link to={c.profiles?.id ? `/profile/${c.profiles.id}` : "#"} className="font-semibold text-foreground hover:underline">
+                  {c.profiles?.display_name || c.profiles?.full_name || "User"}
+                </Link>{" "}
+                {c.content}
+              </p>
+            </div>
+          ))}
+          {commentCount > 2 && (
+            <button onClick={toggleComments} className="text-xs text-primary font-medium">
+              View all {commentCount} comments
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-3 border-t border-border/50">
-        <button onClick={handleLike} className={cn(
+        <button onClick={handleLike} disabled={likeLoading} className={cn(
           "flex items-center gap-1.5 transition-colors",
           liked ? "text-destructive" : "text-muted-foreground hover:text-destructive"
         )}>
@@ -202,7 +355,7 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
 
         <button onClick={toggleComments} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
           <MessageCircle className={cn("h-5 w-5", showComments && "text-primary")} />
-          <span className="text-xs font-medium">{(post as any).comment_count || comments.length || ""}</span>
+          <span className="text-xs font-medium">{commentCount || ""}</span>
         </button>
 
         <button onClick={handleRepost} className={cn(
@@ -218,7 +371,7 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
         </button>
       </div>
 
-      {/* Comments section */}
+      {/* Comments section (expanded) */}
       {showComments && (
         <div className="border-t border-border/50 px-4 py-3 space-y-3">
           {loadingComments ? (
@@ -229,16 +382,20 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {comments.map((c: any) => (
                 <div key={c.id} className="flex gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
-                    {c.profiles?.avatar_url ? (
-                      <img src={c.profiles.avatar_url} className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="text-[10px] font-bold text-primary">{(c.profiles?.full_name || "?").charAt(0)}</span>
-                    )}
-                  </div>
+                  <Link to={c.profiles?.id ? `/profile/${c.profiles.id}` : "#"} className="shrink-0">
+                    <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                      {c.profiles?.avatar_url ? (
+                        <img src={c.profiles.avatar_url} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-primary">{(c.profiles?.full_name || "?").charAt(0)}</span>
+                      )}
+                    </div>
+                  </Link>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs">
-                      <span className="font-semibold">{c.profiles?.full_name || "User"}</span>{" "}
+                      <Link to={c.profiles?.id ? `/profile/${c.profiles.id}` : "#"} className="font-semibold hover:underline">
+                        {c.profiles?.display_name || c.profiles?.full_name || "User"}
+                      </Link>{" "}
                       {c.content}
                     </p>
                     <p className="text-[10px] text-muted-foreground">{timeAgo(c.created_at)}</p>
