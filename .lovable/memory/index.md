@@ -1,3 +1,6 @@
+# Memory: index.md
+Updated: now
+
 OpenChair - real-time beauty services discovery & booking marketplace
 
 ## Design System
@@ -9,24 +12,17 @@ OpenChair - real-time beauty services discovery & booking marketplace
 - Uses custom `--status-*` CSS vars and `status-*` Tailwind tokens
 
 ## Architecture
-- Two-sided marketplace: clients + professionals
-- Client routes: /home, /discover, /search, /favorites, /profile, /pro/:id, /messages, /messages/:id
-- Pro routes: /pro/dashboard, /pro/bookings, /pro/services, /pro/portfolio, /pro/my-profile, /pro/profile-edit
-- Shared: /notifications, /settings, /messages
-- DB tables: profiles, professional_profiles, services, bookings, reviews, posts, comments, reposts, post_likes, follows, favorites, notifications, conversations, messages, user_roles, admin_actions
-- posts table has is_pinned column for featured posts
-- conversations/messages tables for DMs with realtime
-- DB trigger notify_followers_open_chair auto-creates notifications when pro goes open-chair
-- Realtime enabled on: professional_profiles, messages, bookings
+- Dual-role system: users can be client AND professional simultaneously
+- Auth context exposes: role (primary), roles[] (all), isPro, isClient flags
+- Clients can upgrade to pro via /upgrade-to-pro (preserves client data)
+- Professionals who sign up also get client role automatically
+- Client routes accessible to both client and professional roles
+- Pro routes restricted to professional/shop_owner roles
+- RoleBadge component shows P (pro) or C (client) with clickable explanation
+- Route: /upgrade-to-pro — full pro onboarding for existing clients
 
-## Phase Status
-- Phase 1 (UI scaffold): ✅
-- Phase 2 (Auth, DB, social features): ✅
-- Messaging system: ✅ conversations + messages with realtime
-- Open Chairs Map: ✅ Leaflet-based map on home page
-- Pinned posts: ✅ pros can pin one post to top of profile
-- Activity feed: ✅ prioritizes followed pros + trending by engagement
-- Post interactions: ✅ likes/comments/reposts persist to DB with count updates
-- Feed shows isLiked/isReposted state per user
-- Booking flow: ✅ end-to-end with realtime updates
-- All UI uses live Supabase data, no mock data in production code
+## Key Files
+- src/lib/auth-context.tsx — dual-role auth with roles[], isPro, isClient
+- src/components/ProtectedRoute.tsx — checks roles[] array for access
+- src/pages/onboarding/ProUpgrade.tsx — client→pro upgrade flow
+- src/components/BottomNav.tsx — uses isPro for nav detection
