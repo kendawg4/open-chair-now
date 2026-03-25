@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientProfile() {
-  const { profile, user, role, signOut } = useAuth();
+  const { profile, user, role, isPro, signOut } = useAuth();
   const navigate = useNavigate();
 
   // Redirect professionals to their own pro profile view
