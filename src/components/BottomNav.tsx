@@ -1,4 +1,4 @@
-import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Image, Scissors, MessageCircle } from "lucide-react";
+import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Scissors, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -25,10 +25,10 @@ interface BottomNavProps {
 
 export function BottomNav({ role: roleProp }: BottomNavProps) {
   const location = useLocation();
-  const { role: authRole } = useAuth();
+  const { isPro } = useAuth();
 
   // Auto-detect role from auth context if not explicitly passed
-  const effectiveRole = roleProp ?? (authRole === "professional" || authRole === "shop_owner" ? "pro" : "client");
+  const effectiveRole = roleProp ?? (isPro ? "pro" : "client");
   const nav = effectiveRole === "pro" ? proNav : clientNav;
 
   return (

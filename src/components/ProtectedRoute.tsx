@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, role, loading } = useAuth();
+  const { user, roles, role, isPro, loading } = useAuth();
 
   if (loading) {
     return (
@@ -26,14 +26,17 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
-  if (!role) {
+  if (roles.length === 0) {
     return <Navigate to="/onboarding/role" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    if (role === "professional") return <Navigate to="/pro/dashboard" replace />;
-    if (role === "admin") return <Navigate to="/admin" replace />;
-    return <Navigate to="/home" replace />;
+  if (allowedRoles) {
+    const hasAccess = allowedRoles.some(r => roles.includes(r as any));
+    if (!hasAccess) {
+      if (isPro) return <Navigate to="/pro/dashboard" replace />;
+      if (role === "admin") return <Navigate to="/admin" replace />;
+      return <Navigate to="/home" replace />;
+    }
   }
 
   return <>{children}</>;

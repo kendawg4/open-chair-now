@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare } from "lucide-react";
+import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare, Home } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
@@ -82,6 +82,7 @@ function ActivityFeedSection() {
 
 function ProDashboardInner() {
   const { profile } = useAuth();
+  const { isClient } = useAuth();
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
   const { data: bookings } = useMyBookings("pro");
@@ -184,6 +185,13 @@ function ProDashboardInner() {
       </header>
 
       <div className="px-4 pt-4 space-y-5">
+        {/* Client mode link for dual-role users */}
+        {isClient && (
+          <Link to="/home" className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary/50 border border-border p-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Home className="h-3.5 w-3.5" />
+            Browse as Client
+          </Link>
+        )}
         {/* OPEN CHAIR TOGGLE — THE HERO */}
         <OpenChairToggle currentStatus={proProfile.status} />
 

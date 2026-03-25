@@ -2,14 +2,14 @@ import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { Settings, ChevronRight, Heart, Calendar, Star, Bell, LogOut, Scissors, MapPin, Edit2 } from "lucide-react";
+import { Settings, ChevronRight, Heart, Calendar, Star, Bell, LogOut, Scissors, MapPin, Edit2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { RoleBadge } from "@/components/RoleBadge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientProfile() {
-  const { profile, user, role, signOut } = useAuth();
+  const { profile, user, role, isPro, signOut } = useAuth();
   const navigate = useNavigate();
 
   // Redirect professionals to their own pro profile view
@@ -106,7 +106,8 @@ export default function ClientProfile() {
 
           <div className="flex items-center gap-1.5 mt-3">
             <h1 className="font-display text-xl font-bold">{displayName}</h1>
-            <RoleBadge role={(role === "professional" || role === "shop_owner") ? "pro" : "client"} size="md" />
+            <RoleBadge role={isPro ? "pro" : "client"} size="md" />
+            {isPro && <RoleBadge role="client" size="sm" />}
           </div>
 
           {locationParts.length > 0 && (
@@ -196,8 +197,8 @@ export default function ClientProfile() {
           </section>
         )}
 
-        {/* Pro switch */}
-        {(role === "professional" || role === "shop_owner") && (
+        {/* Pro switch / upgrade */}
+        {isPro ? (
           <div className="mt-6 border-t border-border pt-4">
             <Link to="/pro/dashboard" className="flex items-center gap-3 rounded-xl p-3 bg-primary/5 border border-primary/20">
               <Scissors className="h-5 w-5 text-primary" />
@@ -206,6 +207,20 @@ export default function ClientProfile() {
                 <p className="text-xs text-muted-foreground">Manage your professional profile</p>
               </div>
               <ChevronRight className="h-4 w-4 text-primary" />
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 border-t border-border pt-4 space-y-3">
+            <p className="text-xs text-muted-foreground text-center px-4">
+              Clients can browse and book. Become a Professional to offer services and receive bookings.
+            </p>
+            <Link to="/upgrade-to-pro" className="flex items-center gap-3 rounded-xl p-3 bg-accent/10 border border-accent/30">
+              <Sparkles className="h-5 w-5 text-accent-foreground" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Become a Professional</p>
+                <p className="text-xs text-muted-foreground">Offer services and receive bookings</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-accent-foreground" />
             </Link>
           </div>
         )}

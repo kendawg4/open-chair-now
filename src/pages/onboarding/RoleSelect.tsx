@@ -49,10 +49,19 @@ export default function RoleSelect() {
       return;
     }
 
+    // Insert selected role
     const { error } = await supabase.from("user_roles").insert({
       user_id: user.id,
       role: selected,
     });
+
+    // If signing up as professional, also add client role for dual capabilities
+    if (selected === "professional") {
+      await supabase.from("user_roles").insert({
+        user_id: user.id,
+        role: "client" as any,
+      });
+    }
     setLoading(false);
     if (error) {
       toast.error(error.message);

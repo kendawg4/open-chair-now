@@ -18,6 +18,7 @@ import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import RoleSelect from "./pages/onboarding/RoleSelect";
+import ProUpgrade from "./pages/onboarding/ProUpgrade";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import ProOnboarding from "./pages/onboarding/ProOnboarding";
 import ClientHome from "./pages/client/Home";
@@ -71,15 +72,16 @@ const App = () => (
             <Route path="/onboarding/role" element={<RoleSelect />} />
             <Route path="/onboarding/client" element={<ClientOnboarding />} />
             <Route path="/onboarding/pro" element={<ProOnboarding />} />
+            <Route path="/upgrade-to-pro" element={<ProtectedRoute allowedRoles={["client"]}><ProUpgrade /></ProtectedRoute>} />
 
-            {/* Client */}
-            <Route path="/home" element={<ProtectedRoute allowedRoles={["client"]}><ClientHome /></ProtectedRoute>} />
-            <Route path="/discover" element={<ProtectedRoute allowedRoles={["client"]}><Discover /></ProtectedRoute>} />
-            <Route path="/search" element={<ProtectedRoute allowedRoles={["client"]}><Search /></ProtectedRoute>} />
-            <Route path="/favorites" element={<ProtectedRoute allowedRoles={["client"]}><Favorites /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute allowedRoles={["client"]}><ClientProfile /></ProtectedRoute>} />
+            {/* Client — accessible to clients AND professionals (dual role) */}
+            <Route path="/home" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><ClientHome /></ProtectedRoute>} />
+            <Route path="/discover" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><Discover /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><Search /></ProtectedRoute>} />
+            <Route path="/favorites" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><Favorites /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><ClientProfile /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><ClientProfileEdit /></ProtectedRoute>} />
-            <Route path="/bookings" element={<ProtectedRoute allowedRoles={["client"]}><ClientBookings /></ProtectedRoute>} />
+            <Route path="/bookings" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><ClientBookings /></ProtectedRoute>} />
             <Route path="/pro/:id" element={<ProtectedRoute><ProProfile /></ProtectedRoute>} />
 
             {/* Professional */}
