@@ -2,7 +2,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { Settings, ChevronRight, Heart, Calendar, Star, Bell, LogOut, Scissors, MapPin, Edit2 } from "lucide-react";
+import { Settings, ChevronRight, Heart, Calendar, Star, Bell, LogOut, Scissors, MapPin, Edit2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { RoleBadge } from "@/components/RoleBadge";
 import { useQuery } from "@tanstack/react-query";
