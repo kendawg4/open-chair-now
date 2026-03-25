@@ -49,19 +49,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [proProfileId, setProProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Primary role: prefer professional > shop_owner > admin > client
+  const role: AppRole | null = roles.includes("professional") || roles.includes("shop_owner")
+    ? roles.includes("professional") ? "professional" : "shop_owner"
+    : roles.includes("admin") ? "admin"
+    : roles.includes("client") ? "client"
+    : null;
+
+  const isPro = roles.includes("professional") || roles.includes("shop_owner");
+  const isClient = roles.includes("client");
+
   const fetchProfileAndRole = async (userId: string) => {
-    const [profileRes, roleRes] = await Promise.all([
+    const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", userId).single(),
-      supabase.from("user_roles").select("role").eq("user_id", userId).limit(1).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
 
     if (profileRes.data) {
       setProfile(profileRes.data as Profile);
-      // Check for pro profile
       const proRes = await supabase
         .from("professional_profiles")
         .select("id")
@@ -70,10 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
       setProProfileId(proRes.data?.id || null);
     }
-    if (roleRes.data) {
-      setRole(roleRes.data.role as AppRole);
+    if (rolesRes.data && rolesRes.data.length > 0) {
+      setRoles(rolesRes.data.map(r => r.role as AppRole));
     } else {
-      setRole(null);
+      setRoles([]);
     }
   };
 
@@ -87,11 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Use setTimeout to avoid Supabase client deadlock
           setTimeout(() => fetchProfileAndRole(session.user.id), 0);
         } else {
           setProfile(null);
-          setRole(null);
+          setRoles([]);
           setProProfileId(null);
         }
         setLoading(false);
@@ -115,12 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setUser(null);
     setProfile(null);
-    setRole(null);
+    setRoles([]);
     setProProfileId(null);
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, role, proProfileId, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, user, profile, role, roles, isPro, isClient, proProfileId, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
