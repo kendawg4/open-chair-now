@@ -72,6 +72,7 @@ const App = () => (
             <Route path="/onboarding/role" element={<RoleSelect />} />
             <Route path="/onboarding/client" element={<ClientOnboarding />} />
             <Route path="/onboarding/pro" element={<ProOnboarding />} />
+            <Route path="/upgrade-to-pro" element={<ProtectedRoute allowedRoles={["client"]}><ProUpgrade /></ProtectedRoute>} />
 
             {/* Client */}
             <Route path="/home" element={<ProtectedRoute allowedRoles={["client"]}><ClientHome /></ProtectedRoute>} />
