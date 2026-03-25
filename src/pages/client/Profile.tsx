@@ -197,8 +197,8 @@ export default function ClientProfile() {
           </section>
         )}
 
-        {/* Pro switch */}
-        {(role === "professional" || role === "shop_owner") && (
+        {/* Pro switch / upgrade */}
+        {isPro ? (
           <div className="mt-6 border-t border-border pt-4">
             <Link to="/pro/dashboard" className="flex items-center gap-3 rounded-xl p-3 bg-primary/5 border border-primary/20">
               <Scissors className="h-5 w-5 text-primary" />
@@ -207,6 +207,20 @@ export default function ClientProfile() {
                 <p className="text-xs text-muted-foreground">Manage your professional profile</p>
               </div>
               <ChevronRight className="h-4 w-4 text-primary" />
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 border-t border-border pt-4 space-y-3">
+            <p className="text-xs text-muted-foreground text-center px-4">
+              Clients can browse and book. Become a Professional to offer services and receive bookings.
+            </p>
+            <Link to="/upgrade-to-pro" className="flex items-center gap-3 rounded-xl p-3 bg-accent/10 border border-accent/30">
+              <Sparkles className="h-5 w-5 text-accent-foreground" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Become a Professional</p>
+                <p className="text-xs text-muted-foreground">Offer services and receive bookings</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-accent-foreground" />
             </Link>
           </div>
         )}
