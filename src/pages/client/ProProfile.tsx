@@ -446,7 +446,7 @@ export default function ProProfile() {
         </Tabs>
       </div>
 
-      {/* Sticky book bar - only for visitors */}
+      {/* Sticky book bar - for visitors or own profile viewed from client context */}
       {!isOwnProfile && (
         <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 z-50">
           <Button size="lg" className="rounded-full w-full text-base font-semibold h-12" onClick={() => {
@@ -468,8 +468,8 @@ export default function ProProfile() {
         </button>
       )}
 
-      {/* Owner: Bottom nav */}
-      {isOwnProfile && <BottomNav role="pro" />}
+      {/* Bottom nav - always show, respect current browsing context */}
+      <BottomNav />
 
       <BookingSheet
         open={bookingOpen}

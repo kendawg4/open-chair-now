@@ -28,6 +28,7 @@ import Favorites from "./pages/client/Favorites";
 import ClientProfile from "./pages/client/Profile";
 import ClientProfileEdit from "./pages/client/ProfileEdit";
 import ProProfile from "./pages/client/ProProfile";
+import PublicProfile from "./pages/client/PublicProfile";
 import ClientBookings from "./pages/client/Bookings";
 import ProDashboard from "./pages/pro/Dashboard";
 import ProProfileEdit from "./pages/pro/ProfileEdit";
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/profile/edit" element={<ProtectedRoute><ClientProfileEdit /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute allowedRoles={["client", "professional", "shop_owner"]}><ClientBookings /></ProtectedRoute>} />
             <Route path="/pro/:id" element={<ProtectedRoute><ProProfile /></ProtectedRoute>} />
+            <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
 
             {/* Professional */}
             <Route path="/pro/dashboard" element={<ProtectedRoute allowedRoles={["professional", "shop_owner"]}><ProDashboard /></ProtectedRoute>} />
