@@ -28,6 +28,7 @@ import Favorites from "./pages/client/Favorites";
 import ClientProfile from "./pages/client/Profile";
 import ClientProfileEdit from "./pages/client/ProfileEdit";
 import ProProfile from "./pages/client/ProProfile";
+import PublicProfile from "./pages/client/PublicProfile";
 import ClientBookings from "./pages/client/Bookings";
 import ProDashboard from "./pages/pro/Dashboard";
 import ProProfileEdit from "./pages/pro/ProfileEdit";
