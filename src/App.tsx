@@ -18,6 +18,7 @@ import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import RoleSelect from "./pages/onboarding/RoleSelect";
+import ProUpgrade from "./pages/onboarding/ProUpgrade";
 import ClientOnboarding from "./pages/onboarding/ClientOnboarding";
 import ProOnboarding from "./pages/onboarding/ProOnboarding";
 import ClientHome from "./pages/client/Home";
