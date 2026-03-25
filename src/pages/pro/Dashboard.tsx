@@ -185,6 +185,13 @@ function ProDashboardInner() {
       </header>
 
       <div className="px-4 pt-4 space-y-5">
+        {/* Client mode link for dual-role users */}
+        {isClient && (
+          <Link to="/home" className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary/50 border border-border p-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Home className="h-3.5 w-3.5" />
+            Browse as Client
+          </Link>
+        )}
         {/* OPEN CHAIR TOGGLE — THE HERO */}
         <OpenChairToggle currentStatus={proProfile.status} />
 
