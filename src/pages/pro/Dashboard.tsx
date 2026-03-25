@@ -82,6 +82,7 @@ function ActivityFeedSection() {
 
 function ProDashboardInner() {
   const { profile } = useAuth();
+  const { isClient } = useAuth();
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
   const { data: bookings } = useMyBookings("pro");
