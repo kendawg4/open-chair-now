@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare } from "lucide-react";
+import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare, Home } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
