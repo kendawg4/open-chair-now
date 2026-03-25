@@ -106,7 +106,8 @@ export default function ClientProfile() {
 
           <div className="flex items-center gap-1.5 mt-3">
             <h1 className="font-display text-xl font-bold">{displayName}</h1>
-            <RoleBadge role={(role === "professional" || role === "shop_owner") ? "pro" : "client"} size="md" />
+            <RoleBadge role={isPro ? "pro" : "client"} size="md" />
+            {isPro && <RoleBadge role="client" size="sm" />}
           </div>
 
           {locationParts.length > 0 && (
