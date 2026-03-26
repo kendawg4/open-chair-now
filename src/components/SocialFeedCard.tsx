@@ -31,6 +31,7 @@ interface SocialFeedCardProps {
   isLiked?: boolean;
   isReposted?: boolean;
   isOwner?: boolean;
+  highlight?: boolean;
   onPin?: (postId: string) => void;
   onUnpin?: (postId: string) => void;
 }
