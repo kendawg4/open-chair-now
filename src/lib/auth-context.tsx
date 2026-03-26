@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isClient = roles.includes("client");
 
   const fetchProfileAndRole = async (userId: string) => {
+    setRolesLoaded(false);
     const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setRoles([]);
     }
+    setRolesLoaded(true);
   };
 
   const refreshProfile = async () => {
