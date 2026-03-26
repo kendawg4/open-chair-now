@@ -36,7 +36,16 @@ interface SocialFeedCardProps {
   onUnpin?: (postId: string) => void;
 }
 
-export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, onPin, onUnpin }: SocialFeedCardProps) {
+export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, highlight, onPin, onUnpin }: SocialFeedCardProps) {
+  const [isHighlighted, setIsHighlighted] = useState(highlight || false);
+
+  useEffect(() => {
+    if (highlight) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => setIsHighlighted(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlight]);
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
   const [liked, setLiked] = useState(initialLiked || false);
