@@ -16,7 +16,7 @@ const ModeContext = createContext<ModeContextType>({
 const STORAGE_KEY = "openchair_active_mode";
 
 export function ModeProvider({ children }: { children: ReactNode }) {
-  const { isPro, isClient, loading } = useAuth();
+  const { isPro, isClient, loading, rolesLoaded, user } = useAuth();
 
   const [mode, setModeState] = useState<ActiveMode>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -24,11 +24,9 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     return "client";
   });
 
-  const { user } = useAuth();
-
-  // Validate stored mode against actual roles — only when authenticated and loaded
+  // Validate stored mode against actual roles — only when fully authenticated and roles loaded
   useEffect(() => {
-    if (loading || !user) return; // Don't touch mode on logout
+    if (loading || !user || !rolesLoaded) return; // Don't touch mode until roles are confirmed
     if (mode === "pro" && !isPro) {
       setModeState("client");
       localStorage.setItem(STORAGE_KEY, "client");
@@ -37,7 +35,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
       setModeState("pro");
       localStorage.setItem(STORAGE_KEY, "pro");
     }
-  }, [loading, isPro, isClient, user]);
+  }, [loading, rolesLoaded, isPro, isClient, user]);
 
   const setMode = (m: ActiveMode) => {
     setModeState(m);
