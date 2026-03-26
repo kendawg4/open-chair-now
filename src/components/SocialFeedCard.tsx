@@ -64,23 +64,20 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
 
   const handleLike = async () => {
     if (!user || !profile) { toast.error("Sign in to like"); return; }
-    if (likeLoading) return; // Prevent double-tap
+    if (likeLoading) return;
     setLikeLoading(true);
     const newLiked = !liked;
     setLiked(newLiked);
     setLikesCount(prev => newLiked ? prev + 1 : prev - 1);
     try {
       if (newLiked) {
-        // Use upsert-like behavior: check if already liked first
-        const { data: existing } = await supabase
-          .from("post_likes")
-          .select("id")
-          .eq("post_id", post.id)
-          .eq("profile_id", profile.id)
-          .maybeSingle();
-        if (!existing) {
-          await supabase.from("post_likes").insert({ post_id: post.id, profile_id: profile.id });
-          // Create notification for post owner
+        // Use upsert with onConflict to prevent duplicates
+        const { error } = await supabase.from("post_likes").upsert(
+          { post_id: post.id, profile_id: profile.id },
+          { onConflict: "post_id,profile_id", ignoreDuplicates: true }
+        );
+        if (!error) {
+          // Only notify if this is a genuinely new like (no prior notification for this like)
           const { data: postData } = await supabase
             .from("posts")
             .select("professional_profile_id")
@@ -99,13 +96,24 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
                 .eq("id", proProfile.profile_id)
                 .single();
               if (ownerProfile && ownerProfile.user_id !== user.id) {
-                await supabase.from("notifications").insert({
-                  user_id: ownerProfile.user_id,
-                  type: "post_like",
-                  title: `${profile.display_name || profile.full_name} liked your post`,
-                  body: post.content.substring(0, 100),
-                  related_entity_id: post.id,
-                });
+                // Check if a like notification already exists for this post+user combo
+                const { data: existingNotif } = await supabase
+                  .from("notifications")
+                  .select("id")
+                  .eq("user_id", ownerProfile.user_id)
+                  .eq("type", "post_like")
+                  .eq("related_entity_id", post.id)
+                  .ilike("title", `%${(profile.display_name || profile.full_name).substring(0, 20)}%`)
+                  .maybeSingle();
+                if (!existingNotif) {
+                  await supabase.from("notifications").insert({
+                    user_id: ownerProfile.user_id,
+                    type: "post_like",
+                    title: `${profile.display_name || profile.full_name} liked your post`,
+                    body: post.content.substring(0, 100),
+                    related_entity_id: post.id,
+                  });
+                }
               }
             }
           }
@@ -113,7 +121,6 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
       } else {
         await supabase.from("post_likes").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
-      // Update post likes_count from actual count
       const { count } = await supabase
         .from("post_likes")
         .select("id", { count: "exact", head: true })
