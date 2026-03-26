@@ -279,7 +279,7 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
   };
 
   return (
-    <div className={cn("bg-card border rounded-2xl overflow-hidden", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border")}>
+    <div className={cn("bg-card border rounded-2xl overflow-hidden transition-all duration-700", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border", isHighlighted && "ring-2 ring-primary/50 border-primary/60 shadow-lg shadow-primary/10")}>
       {/* Pinned indicator */}
       {post.is_pinned && (
         <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-primary font-medium">

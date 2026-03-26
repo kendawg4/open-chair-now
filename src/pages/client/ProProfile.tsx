@@ -345,19 +345,21 @@ export default function ProProfile() {
                   return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                 })
                 .map((post: any) => (
-                  <SocialFeedCard
-                    key={post.id}
-                    post={{
-                      ...post,
-                      pro_name: displayName,
-                      pro_avatar: pro.avatar_url,
-                      pro_category: pro.category,
-                      pro_status: pro.status,
-                    }}
-                    isOwner={isOwnProfile}
-                    onPin={(postId) => pinPost.mutate(postId)}
-                    onUnpin={(postId) => unpinPost.mutate(postId)}
-                  />
+                  <div key={post.id} ref={post.id === highlightPostId ? highlightedRef : undefined}>
+                    <SocialFeedCard
+                      post={{
+                        ...post,
+                        pro_name: displayName,
+                        pro_avatar: pro.avatar_url,
+                        pro_category: pro.category,
+                        pro_status: pro.status,
+                      }}
+                      isOwner={isOwnProfile}
+                      highlight={post.id === highlightPostId}
+                      onPin={(postId) => pinPost.mutate(postId)}
+                      onUnpin={(postId) => unpinPost.mutate(postId)}
+                    />
+                  </div>
                 ))
             )}
           </TabsContent>
