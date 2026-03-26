@@ -143,16 +143,11 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
     setRepostCount((prev: number) => newReposted ? prev + 1 : prev - 1);
     try {
       if (newReposted) {
-        const { data: existing } = await supabase
-          .from("reposts")
-          .select("id")
-          .eq("post_id", post.id)
-          .eq("profile_id", profile.id)
-          .maybeSingle();
-        if (!existing) {
-          await supabase.from("reposts").insert({ post_id: post.id, profile_id: profile.id });
-          toast.success("Reposted!");
-        }
+        const { error } = await supabase.from("reposts").upsert(
+          { post_id: post.id, profile_id: profile.id },
+          { onConflict: "post_id,profile_id", ignoreDuplicates: true }
+        );
+        if (!error) toast.success("Reposted!");
       } else {
         await supabase.from("reposts").delete().eq("post_id", post.id).eq("profile_id", profile.id);
       }
