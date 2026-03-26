@@ -56,6 +56,20 @@ export default function ProProfile() {
   const startConversation = useStartConversation();
   const isOwnProfile = proProfileId === id;
   const [postSheetOpen, setPostSheetOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const highlightPostId = searchParams.get("post");
+  const highlightedRef = useRef<HTMLDivElement>(null);
+
+  // Auto-switch to posts tab and scroll to highlighted post
+  useEffect(() => {
+    if (highlightPostId && posts) {
+      setSelectedTab("posts");
+      // Wait for render then scroll
+      setTimeout(() => {
+        highlightedRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [highlightPostId, posts]);
 
   if (isLoading) {
     return (
