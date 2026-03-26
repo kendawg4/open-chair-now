@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Notifications() {
-  const { role } = useAuth();
+  const { mode } = useMode();
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
 
