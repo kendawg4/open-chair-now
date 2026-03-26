@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type AppRole = "client" | "professional" | "shop_owner" | "admin";
 
@@ -93,6 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        // Handle email verification redirect
+        if (_event === "SIGNED_IN" && window.location.hash.includes("type=signup")) {
+          // User just verified their email — redirect to login with success message
+          await supabase.auth.signOut();
+          window.location.href = "/login?verified=true";
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
