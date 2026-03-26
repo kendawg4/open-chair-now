@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [proProfileId, setProProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
 
   // Primary role: prefer professional > shop_owner > admin > client
   const role: AppRole | null = roles.includes("professional") || roles.includes("shop_owner")
