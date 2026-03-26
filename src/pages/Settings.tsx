@@ -1,11 +1,13 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/lib/auth-context";
+import { useMode } from "@/lib/mode-context";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogOut, Bell, Shield, HelpCircle, ChevronRight, User, FileText, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Settings() {
-  const { role, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { mode } = useMode();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -14,7 +16,7 @@ export default function Settings() {
   };
 
   const items = [
-    { icon: User, label: "Edit Profile", to: role === "professional" ? "/pro/profile-edit" : "/profile" },
+    { icon: User, label: "Edit Profile", to: mode === "pro" ? "/pro/profile-edit" : "/profile" },
     { icon: Bell, label: "Notification Preferences", to: "/notifications" },
     { icon: Shield, label: "Privacy Policy", to: "/privacy" },
     { icon: HelpCircle, label: "Help Center", to: "/help" },
@@ -26,7 +28,7 @@ export default function Settings() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link to={role === "professional" ? "/pro/dashboard" : "/profile"}>
+          <Link to={mode === "pro" ? "/pro/dashboard" : "/profile"}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="font-display font-bold text-lg">Settings</h1>
