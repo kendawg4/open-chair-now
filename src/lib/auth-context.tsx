@@ -107,13 +107,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          setTimeout(() => fetchProfileAndRole(session.user.id), 0);
+          // Don't set loading false until roles are fetched
+          fetchProfileAndRole(session.user.id).then(() => setLoading(false));
         } else {
           setProfile(null);
           setRoles([]);
           setProProfileId(null);
+          setRolesLoaded(true);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
