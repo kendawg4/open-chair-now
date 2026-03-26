@@ -24,9 +24,11 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     return "client";
   });
 
-  // Once auth loads, validate stored mode against actual roles
+  const { user } = useAuth();
+
+  // Validate stored mode against actual roles — only when authenticated and loaded
   useEffect(() => {
-    if (loading) return;
+    if (loading || !user) return; // Don't touch mode on logout
     if (mode === "pro" && !isPro) {
       setModeState("client");
       localStorage.setItem(STORAGE_KEY, "client");
@@ -35,7 +37,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
       setModeState("pro");
       localStorage.setItem(STORAGE_KEY, "pro");
     }
-  }, [loading, isPro, isClient]);
+  }, [loading, isPro, isClient, user]);
 
   const setMode = (m: ActiveMode) => {
     setModeState(m);
