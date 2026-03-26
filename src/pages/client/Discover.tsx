@@ -119,7 +119,7 @@ export default function Discover() {
         </div>
       )}
 
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }

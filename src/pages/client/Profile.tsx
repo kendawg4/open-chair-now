@@ -229,7 +229,7 @@ export default function ClientProfile() {
           <LogOut className="h-4 w-4" /> Sign Out
         </Button>
       </div>
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }

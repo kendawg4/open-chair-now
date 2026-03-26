@@ -170,7 +170,7 @@ export default function Search() {
           </>
         )}
       </div>
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }

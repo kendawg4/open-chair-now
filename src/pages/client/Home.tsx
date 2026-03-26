@@ -138,7 +138,7 @@ export default function ClientHome() {
         </section>
       </div>
 
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }

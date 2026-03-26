@@ -111,7 +111,7 @@ export default function ClientBookings() {
           </Tabs>
         )}
       </div>
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }

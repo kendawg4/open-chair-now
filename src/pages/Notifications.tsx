@@ -65,7 +65,7 @@ export default function Notifications() {
         )}
       </div>
 
-      <BottomNav role={role === "professional" ? "pro" : "client"} />
+      <BottomNav />
     </div>
   );
 }

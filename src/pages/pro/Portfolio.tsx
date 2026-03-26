@@ -117,7 +117,7 @@ export default function ProPortfolio() {
         </SheetContent>
       </Sheet>
 
-      <BottomNav role="pro" />
+      <BottomNav />
     </div>
   );
 }
