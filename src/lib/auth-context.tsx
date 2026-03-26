@@ -27,6 +27,7 @@ interface AuthContextType {
   isClient: boolean;
   proProfileId: string | null;
   loading: boolean;
+  rolesLoaded: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
