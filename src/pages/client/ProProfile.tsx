@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow, useTogglePinPost, useUnpinPost } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
