@@ -610,6 +610,25 @@ export function useRealtimeBookings() {
 }
 
 // ===== NOTIFICATIONS =====
+export function useUnreadNotificationCount() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["unreadNotificationCount", user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
+}
+
 export function useNotifications() {
   const { user } = useAuth();
   return useQuery({

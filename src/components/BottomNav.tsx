@@ -23,12 +23,26 @@ interface BottomNavProps {
   role?: "client" | "pro";
 }
 
+// Client-context routes — if user is on one of these, keep client nav even for dual-role users
+const clientContextPrefixes = ["/home", "/discover", "/search", "/favorites", "/profile", "/bookings"];
+
 export function BottomNav({ role: roleProp }: BottomNavProps) {
   const location = useLocation();
   const { isPro } = useAuth();
 
-  // Auto-detect role from auth context if not explicitly passed
-  const effectiveRole = roleProp ?? (isPro ? "pro" : "client");
+  // Detect browsing context from current path
+  const isInClientContext = clientContextPrefixes.some(p => location.pathname === p || location.pathname.startsWith(p + "/"));
+  // Also treat /pro/:uuid (viewing a pro profile) as client context if user navigated from client routes
+  const isViewingProProfile = /^\/pro\/[0-9a-f-]{36}/.test(location.pathname);
+
+  let effectiveRole: "client" | "pro";
+  if (roleProp) {
+    effectiveRole = roleProp;
+  } else if (isInClientContext || isViewingProProfile) {
+    effectiveRole = "client";
+  } else {
+    effectiveRole = isPro ? "pro" : "client";
+  }
   const nav = effectiveRole === "pro" ? proNav : clientNav;
 
   return (

@@ -36,6 +36,11 @@ export default function ClientHome() {
             </Link>
             <Link to="/notifications" className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
               <Bell className="h-5 w-5" />
+              {!!unreadCount && unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
