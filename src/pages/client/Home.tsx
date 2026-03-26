@@ -14,6 +14,7 @@ export default function ClientHome() {
   const { data: professionals, isLoading: prosLoading } = useProfessionals();
   const { data: feed, isLoading: feedLoading } = useFeed();
   useRealtimeProfessionals();
+  const { data: unreadCount } = useUnreadNotificationCount();
 
   const availableNow = (professionals || []).filter(p =>
     ["open-chair", "available-now", "last-minute"].includes(p.status)
