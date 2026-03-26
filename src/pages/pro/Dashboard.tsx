@@ -177,6 +177,11 @@ function ProDashboardInner() {
           <div className="flex gap-2">
             <Link to="/notifications" className="relative h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
               <Bell className="h-4 w-4" />
+              {!!unreadCount && unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </Link>
             <Link to="/settings" className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center">
               <Settings className="h-4 w-4" />
