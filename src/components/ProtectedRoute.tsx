@@ -8,9 +8,10 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, roles, role, isPro, loading } = useAuth();
+  const { user, roles, role, isPro, loading, rolesLoaded } = useAuth();
 
-  if (loading) {
+  // Wait for both auth session AND roles to be fully loaded
+  if (loading || (user && !rolesLoaded)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="space-y-4 w-64">

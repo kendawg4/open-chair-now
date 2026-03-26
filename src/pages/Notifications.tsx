@@ -55,16 +55,16 @@ export default function Notifications() {
     switch (n.type) {
       case "post_like":
       case "post_comment":
-        // relatedId is post id — find the pro profile that owns it, navigate there
+        // relatedId is post id — navigate to the pro profile that owns it and scroll to post
         try {
           const { supabase } = await import("@/integrations/supabase/client");
           const { data: post } = await supabase
             .from("posts")
-            .select("professional_profile_id")
+            .select("id, professional_profile_id")
             .eq("id", relatedId)
             .single();
           if (post) {
-            navigate(`/pro/${post.professional_profile_id}`);
+            navigate(`/pro/${post.professional_profile_id}?post=${post.id}`);
           }
         } catch { /* ignore */ }
         return;

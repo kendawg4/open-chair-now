@@ -27,6 +27,7 @@ interface AuthContextType {
   isClient: boolean;
   proProfileId: string | null;
   loading: boolean;
+  rolesLoaded: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -41,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
   isClient: false,
   proProfileId: null,
   loading: true,
+  rolesLoaded: false,
   signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [proProfileId, setProProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
 
   // Primary role: prefer professional > shop_owner > admin > client
   const role: AppRole | null = roles.includes("professional") || roles.includes("shop_owner")
@@ -64,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isClient = roles.includes("client");
 
   const fetchProfileAndRole = async (userId: string) => {
+    setRolesLoaded(false);
     const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -84,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setRoles([]);
     }
+    setRolesLoaded(true);
   };
 
   const refreshProfile = async () => {
@@ -104,21 +109,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          setTimeout(() => fetchProfileAndRole(session.user.id), 0);
+          // Don't set loading false until roles are fetched
+          fetchProfileAndRole(session.user.id).then(() => setLoading(false));
         } else {
           setProfile(null);
           setRoles([]);
           setProProfileId(null);
+          setRolesLoaded(true);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfileAndRole(session.user.id);
+        await fetchProfileAndRole(session.user.id);
+      } else {
+        setRolesLoaded(true);
       }
       setLoading(false);
     });
@@ -136,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, role, roles, isPro, isClient, proProfileId, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ session, user, profile, role, roles, isPro, isClient, proProfileId, loading, rolesLoaded, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
