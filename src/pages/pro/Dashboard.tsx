@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Eye, Users, Calendar, Star, Bell, Settings, ChevronRight, User, Scissors, Image, CheckCircle, Clock, XCircle, Plus, PenSquare, Home } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -23,6 +23,7 @@ import {
 import { categoryLabels } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useMode } from "@/lib/mode-context";
 
 const statuses = [
   { value: "open-chair", emoji: "🪑", label: "Open Chair", desc: "Walk-ins welcome" },
@@ -83,6 +84,8 @@ function ActivityFeedSection() {
 function ProDashboardInner() {
   const { profile } = useAuth();
   const { isClient } = useAuth();
+  const { setMode } = useMode();
+  const navigate = useNavigate();
   const { data: proProfile, isLoading } = useMyProProfile();
   const updateStatus = useUpdateStatus();
   const { data: bookings } = useMyBookings("pro");
@@ -147,6 +150,11 @@ function ProDashboardInner() {
     );
   };
 
+  const handleSwitchToClientMode = () => {
+    setMode("client");
+    navigate("/home");
+  };
+
   const displayName = proProfile.display_name || proProfile.business_name || proProfile.full_name;
   const allBookings = bookings || [];
   const pendingBookings = allBookings.filter((b: any) => b.status === "pending");
@@ -193,10 +201,14 @@ function ProDashboardInner() {
       <div className="px-4 pt-4 space-y-5">
         {/* Client mode link for dual-role users */}
         {isClient && (
-          <Link to="/home" className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary/50 border border-border p-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            type="button"
+            onClick={handleSwitchToClientMode}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/50 p-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
             <Home className="h-3.5 w-3.5" />
-            Browse as Client
-          </Link>
+            Switch to Client mode
+          </button>
         )}
         {/* OPEN CHAIR TOGGLE — THE HERO */}
         <OpenChairToggle currentStatus={proProfile.status} />

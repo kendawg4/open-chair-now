@@ -7,9 +7,11 @@ import { useAuth } from "@/lib/auth-context";
 import { RoleBadge } from "@/components/RoleBadge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMode } from "@/lib/mode-context";
 
 export default function ClientProfile() {
   const { profile, user, role, isPro, signOut } = useAuth();
+  const { setMode } = useMode();
   const navigate = useNavigate();
 
   // Redirect professionals to their own pro profile view
@@ -53,6 +55,11 @@ export default function ClientProfile() {
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleSwitchToProMode = () => {
+    setMode("pro");
+    navigate("/pro/dashboard");
   };
 
   if (!profile) {
@@ -200,14 +207,18 @@ export default function ClientProfile() {
         {/* Pro switch / upgrade */}
         {isPro ? (
           <div className="mt-6 border-t border-border pt-4">
-            <Link to="/pro/dashboard" className="flex items-center gap-3 rounded-xl p-3 bg-primary/5 border border-primary/20">
+            <button
+              type="button"
+              onClick={handleSwitchToProMode}
+              className="flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-left"
+            >
               <Scissors className="h-5 w-5 text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-semibold">Switch to Pro mode</p>
                 <p className="text-xs text-muted-foreground">Manage your professional profile</p>
               </div>
               <ChevronRight className="h-4 w-4 text-primary" />
-            </Link>
+            </button>
           </div>
         ) : (
           <div className="mt-6 border-t border-border pt-4 space-y-3">
