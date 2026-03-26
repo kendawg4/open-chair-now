@@ -405,7 +405,7 @@ function ProDashboardInner() {
         proProfileId={proProfile.id}
       />
 
-      <BottomNav role="pro" />
+      <BottomNav />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useNotifications, useMarkNotificationRead } from "@/hooks/use-data";
-import { useAuth } from "@/lib/auth-context";
+import { useMode } from "@/lib/mode-context";
 import { ArrowLeft, Bell, BellOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Notifications() {
-  const { role } = useAuth();
+  const { mode } = useMode();
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
 
@@ -16,7 +16,7 @@ export default function Notifications() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link to={role === "professional" ? "/pro/dashboard" : "/home"}>
+          <Link to={mode === "pro" ? "/pro/dashboard" : "/home"}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="font-display font-bold text-lg">Notifications</h1>
@@ -65,7 +65,7 @@ export default function Notifications() {
         )}
       </div>
 
-      <BottomNav role={role === "professional" ? "pro" : "client"} />
+      <BottomNav />
     </div>
   );
 }

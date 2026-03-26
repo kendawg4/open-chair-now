@@ -134,7 +134,7 @@ export default function ProBookings() {
           </Tabs>
         )}
       </div>
-      <BottomNav role="pro" />
+      <BottomNav />
     </div>
   );
 }

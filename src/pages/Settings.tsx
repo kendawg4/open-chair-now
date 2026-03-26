@@ -53,7 +53,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <BottomNav role={role === "professional" ? "pro" : "client"} />
+      <BottomNav />
     </div>
   );
 }

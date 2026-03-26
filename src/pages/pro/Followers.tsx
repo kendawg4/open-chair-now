@@ -99,7 +99,7 @@ export default function FollowersPage() {
         )}
       </div>
 
-      <BottomNav role={role === "professional" || role === "shop_owner" ? "pro" : "client"} />
+      <BottomNav />
     </div>
   );
 }

@@ -204,7 +204,7 @@ export default function ProServices() {
         </SheetContent>
       </Sheet>
 
-      <BottomNav role="pro" />
+      <BottomNav />
     </div>
   );
 }

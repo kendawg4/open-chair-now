@@ -33,7 +33,7 @@ export default function Favorites() {
           ))
         )}
       </div>
-      <BottomNav role="client" />
+      <BottomNav />
     </div>
   );
 }
