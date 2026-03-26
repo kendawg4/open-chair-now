@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useProfessionalById, useReviewsForPro, useIsFavorite, useIsFollowing, useToggleFavorite, useToggleFollow, useTogglePinPost, useUnpinPost } from "@/hooks/use-data";
 import { StatusBadge } from "@/components/StatusBadge";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
@@ -56,6 +56,20 @@ export default function ProProfile() {
   const startConversation = useStartConversation();
   const isOwnProfile = proProfileId === id;
   const [postSheetOpen, setPostSheetOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const highlightPostId = searchParams.get("post");
+  const highlightedRef = useRef<HTMLDivElement>(null);
+
+  // Auto-switch to posts tab and scroll to highlighted post
+  useEffect(() => {
+    if (highlightPostId && posts) {
+      setSelectedTab("posts");
+      // Wait for render then scroll
+      setTimeout(() => {
+        highlightedRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [highlightPostId, posts]);
 
   if (isLoading) {
     return (
@@ -331,19 +345,21 @@ export default function ProProfile() {
                   return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                 })
                 .map((post: any) => (
-                  <SocialFeedCard
-                    key={post.id}
-                    post={{
-                      ...post,
-                      pro_name: displayName,
-                      pro_avatar: pro.avatar_url,
-                      pro_category: pro.category,
-                      pro_status: pro.status,
-                    }}
-                    isOwner={isOwnProfile}
-                    onPin={(postId) => pinPost.mutate(postId)}
-                    onUnpin={(postId) => unpinPost.mutate(postId)}
-                  />
+                  <div key={post.id} ref={post.id === highlightPostId ? highlightedRef : undefined}>
+                    <SocialFeedCard
+                      post={{
+                        ...post,
+                        pro_name: displayName,
+                        pro_avatar: pro.avatar_url,
+                        pro_category: pro.category,
+                        pro_status: pro.status,
+                      }}
+                      isOwner={isOwnProfile}
+                      highlight={post.id === highlightPostId}
+                      onPin={(postId) => pinPost.mutate(postId)}
+                      onUnpin={(postId) => unpinPost.mutate(postId)}
+                    />
+                  </div>
                 ))
             )}
           </TabsContent>

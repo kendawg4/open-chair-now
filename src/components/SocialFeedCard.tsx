@@ -31,11 +31,21 @@ interface SocialFeedCardProps {
   isLiked?: boolean;
   isReposted?: boolean;
   isOwner?: boolean;
+  highlight?: boolean;
   onPin?: (postId: string) => void;
   onUnpin?: (postId: string) => void;
 }
 
-export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, onPin, onUnpin }: SocialFeedCardProps) {
+export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initialReposted, isOwner, highlight, onPin, onUnpin }: SocialFeedCardProps) {
+  const [isHighlighted, setIsHighlighted] = useState(highlight || false);
+
+  useEffect(() => {
+    if (highlight) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => setIsHighlighted(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlight]);
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
   const [liked, setLiked] = useState(initialLiked || false);
@@ -269,7 +279,7 @@ export function SocialFeedCard({ post, isLiked: initialLiked, isReposted: initia
   };
 
   return (
-    <div className={cn("bg-card border rounded-2xl overflow-hidden", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border")}>
+    <div className={cn("bg-card border rounded-2xl overflow-hidden transition-all duration-700", post.is_pinned ? "border-primary/40 ring-1 ring-primary/20" : "border-border", isHighlighted && "ring-2 ring-primary/50 border-primary/60 shadow-lg shadow-primary/10")}>
       {/* Pinned indicator */}
       {post.is_pinned && (
         <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-primary font-medium">
