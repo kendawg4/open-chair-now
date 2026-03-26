@@ -3,7 +3,7 @@ import { ProCard } from "@/components/ProCard";
 import { SocialFeedCard } from "@/components/SocialFeedCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { OpenChairsMap } from "@/components/OpenChairsMap";
-import { useProfessionals, useFeed, useRealtimeProfessionals } from "@/hooks/use-data";
+import { useProfessionals, useFeed, useRealtimeProfessionals, useUnreadNotificationCount } from "@/hooks/use-data";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "react-router-dom";
 import { MapPin, Bell, ChevronRight, MessageCircle } from "lucide-react";
