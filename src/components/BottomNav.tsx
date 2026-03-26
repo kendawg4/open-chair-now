@@ -1,7 +1,7 @@
 import { Home, MapPin, Search, Heart, User, LayoutDashboard, Calendar, Scissors, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/lib/auth-context";
+import { useMode } from "@/lib/mode-context";
 
 const clientNav = [
   { to: "/home", icon: Home, label: "Home" },
@@ -19,31 +19,11 @@ const proNav = [
   { to: "/pro/my-profile", icon: User, label: "Profile" },
 ];
 
-interface BottomNavProps {
-  role?: "client" | "pro";
-}
-
-// Client-context routes — if user is on one of these, keep client nav even for dual-role users
-const clientContextPrefixes = ["/home", "/discover", "/search", "/favorites", "/profile", "/bookings"];
-
-export function BottomNav({ role: roleProp }: BottomNavProps) {
+export function BottomNav() {
   const location = useLocation();
-  const { isPro } = useAuth();
+  const { mode } = useMode();
 
-  // Detect browsing context from current path
-  const isInClientContext = clientContextPrefixes.some(p => location.pathname === p || location.pathname.startsWith(p + "/"));
-  // Also treat /pro/:uuid (viewing a pro profile) as client context if user navigated from client routes
-  const isViewingProProfile = /^\/pro\/[0-9a-f-]{36}/.test(location.pathname);
-
-  let effectiveRole: "client" | "pro";
-  if (roleProp) {
-    effectiveRole = roleProp;
-  } else if (isInClientContext || isViewingProProfile) {
-    effectiveRole = "client";
-  } else {
-    effectiveRole = isPro ? "pro" : "client";
-  }
-  const nav = effectiveRole === "pro" ? proNav : clientNav;
+  const nav = mode === "pro" ? proNav : clientNav;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 safe-area-bottom">
