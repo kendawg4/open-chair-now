@@ -95,6 +95,7 @@ function ProDashboardInner() {
 
   useRealtimeProfessionals();
   useRealtimeBookings();
+  const { data: unreadCount } = useUnreadNotificationCount();
 
   const statusExpiresAt = useMemo(() => {
     if (statusDuration === "none") return null;
