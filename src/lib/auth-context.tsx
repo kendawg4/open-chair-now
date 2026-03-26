@@ -42,6 +42,7 @@ const AuthContext = createContext<AuthContextType>({
   isClient: false,
   proProfileId: null,
   loading: true,
+  rolesLoaded: false,
   signOut: async () => {},
   refreshProfile: async () => {},
 });
