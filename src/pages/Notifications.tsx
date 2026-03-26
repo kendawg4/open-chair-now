@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/BottomNav";
 import { useNotifications, useMarkNotificationRead } from "@/hooks/use-data";
-import { useAuth } from "@/lib/auth-context";
+import { useMode } from "@/lib/mode-context";
 import { ArrowLeft, Bell, BellOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
