@@ -16,7 +16,7 @@ export default function Notifications() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link to={role === "professional" ? "/pro/dashboard" : "/home"}>
+          <Link to={mode === "pro" ? "/pro/dashboard" : "/home"}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="font-display font-bold text-lg">Notifications</h1>
