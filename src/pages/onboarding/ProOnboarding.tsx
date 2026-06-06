@@ -75,41 +75,62 @@ export default function ProOnboarding() {
     if (!city.trim()) { toast.error("Please enter your city"); return; }
     setLoading(true);
 
-    // Geocode the address
-    const coords = await geocodeAddress(address || null, city, stateName || null);
+    try {
+      // Geocode is best-effort and bounded — never block onboarding on it
+      const coords = await geocodeAddress(address || null, city, stateName || null).catch(() => null);
 
-    await supabase.from("profiles").update({
-      city: city.trim(),
-      state: stateName.trim() || null,
-      phone: phone.trim() || null,
-      bio: bio.trim() || null,
-    }).eq("id", profile.id);
+      const { error: profileErr } = await supabase.from("profiles").update({
+        city: city.trim(),
+        state: stateName.trim() || null,
+        phone: phone.trim() || null,
+        bio: bio.trim() || null,
+      }).eq("id", profile.id);
+      if (profileErr) {
+        console.error("Profile update failed:", profileErr);
+        toast.error(`Could not save profile: ${profileErr.message}`);
+        return;
+      }
 
-    const { error } = await supabase.from("professional_profiles").insert({
-      profile_id: profile.id,
-      business_name: businessName.trim() || null,
-      category: category as any,
-      business_type: businessType as any,
-      specialties,
-      years_experience: parseInt(yearsExperience) || 0,
-      shop_name: shopName.trim() || null,
-      address: address.trim() || null,
-      city: city.trim() || null,
-      state: stateName.trim() || null,
-      latitude: coords?.latitude ?? null,
-      longitude: coords?.longitude ?? null,
-      instagram_url: instagram.trim() || null,
-      accepts_walk_ins: acceptsWalkIns,
-      onboarding_completed: true,
-    });
+      // Avoid duplicate-key errors if the user retries after a partial failure
+      const { data: existingPro } = await supabase
+        .from("professional_profiles")
+        .select("id")
+        .eq("profile_id", profile.id)
+        .maybeSingle();
 
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
+      if (!existingPro) {
+        const { error } = await supabase.from("professional_profiles").insert({
+          profile_id: profile.id,
+          business_name: businessName.trim() || null,
+          category: category as any,
+          business_type: businessType as any,
+          specialties,
+          years_experience: parseInt(yearsExperience) || 0,
+          shop_name: shopName.trim() || null,
+          address: address.trim() || null,
+          city: city.trim() || null,
+          state: stateName.trim() || null,
+          latitude: coords?.latitude ?? null,
+          longitude: coords?.longitude ?? null,
+          instagram_url: instagram.trim() || null,
+          accepts_walk_ins: acceptsWalkIns,
+          onboarding_completed: true,
+        });
+        if (error) {
+          console.error("Pro profile insert failed:", error);
+          toast.error(`Could not create pro profile: ${error.message}`);
+          return;
+        }
+      }
+
       await refreshProfile();
       setDone(true);
       setTimeout(() => navigate("/pro/dashboard"), 1800);
+    } catch (e: any) {
+      console.error("Onboarding error:", e);
+      toast.error(e?.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
