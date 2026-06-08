@@ -281,6 +281,11 @@ export default function ProOnboarding() {
               </div>
 
               <div className="space-y-2">
+                <Label>ZIP code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Input value={zipCode} onChange={e => setZipCode(e.target.value)} className="rounded-xl" placeholder="11201" inputMode="numeric" />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Phone number <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="rounded-xl" placeholder="(555) 123-4567" />
               </div>
