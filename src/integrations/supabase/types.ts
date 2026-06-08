@@ -606,6 +606,7 @@ export type Database = {
           is_verified: boolean | null
           languages: string[] | null
           latitude: number | null
+          location_status: string | null
           longitude: number | null
           onboarding_completed: boolean | null
           profile_id: string
@@ -641,6 +642,7 @@ export type Database = {
           is_verified?: boolean | null
           languages?: string[] | null
           latitude?: number | null
+          location_status?: string | null
           longitude?: number | null
           onboarding_completed?: boolean | null
           profile_id: string
@@ -676,6 +678,7 @@ export type Database = {
           is_verified?: boolean | null
           languages?: string[] | null
           latitude?: number | null
+          location_status?: string | null
           longitude?: number | null
           onboarding_completed?: boolean | null
           profile_id?: string

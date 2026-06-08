@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { geocodeAddress } from "@/hooks/use-geocode";
+import { normalizeAddress } from "@/lib/address";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,7 @@ export default function ProOnboarding() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [stateName, setStateName] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [phone, setPhone] = useState("");
   const [yearsExperience, setYearsExperience] = useState("");
   const [bio, setBio] = useState("");
@@ -75,19 +77,34 @@ export default function ProOnboarding() {
     if (!city.trim()) { toast.error("Please enter your city"); return; }
     setLoading(true);
 
-    try {
-      // Geocode is best-effort and bounded — never block onboarding on it
-      const coords = await geocodeAddress(address || null, city, stateName || null).catch(() => null);
+    // Trim/normalize address inputs — used for geocoding AND stored as-typed-ish
+    const rawAddress = address.trim();
+    const normalizedAddress = rawAddress ? normalizeAddress(rawAddress) : "";
+    const cityT = city.trim();
+    const stateT = stateName.trim();
+    const zipT = zipCode.trim();
 
+    // Geocoding is best-effort. NEVER block onboarding on it.
+    let coords: { latitude: number; longitude: number } | null = null;
+    try {
+      coords = await geocodeAddress(normalizedAddress || null, cityT, stateT || null);
+    } catch (e) {
+      console.warn("Geocode threw, continuing anyway:", e);
+    }
+    const locationStatus = coords ? "verified" : (rawAddress || cityT ? "needs_review" : "unverified");
+
+    try {
       const { error: profileErr } = await supabase.from("profiles").update({
-        city: city.trim(),
-        state: stateName.trim() || null,
+        city: cityT,
+        state: stateT || null,
+        zip_code: zipT || null,
         phone: phone.trim() || null,
         bio: bio.trim() || null,
       }).eq("id", profile.id);
       if (profileErr) {
         console.error("Profile update failed:", profileErr);
         toast.error(`Could not save profile: ${profileErr.message}`);
+        setLoading(false);
         return;
       }
 
@@ -98,38 +115,58 @@ export default function ProOnboarding() {
         .eq("profile_id", profile.id)
         .maybeSingle();
 
-      if (!existingPro) {
-        const { error } = await supabase.from("professional_profiles").insert({
-          profile_id: profile.id,
-          business_name: businessName.trim() || null,
-          category: category as any,
-          business_type: businessType as any,
-          specialties,
-          years_experience: parseInt(yearsExperience) || 0,
-          shop_name: shopName.trim() || null,
-          address: address.trim() || null,
-          city: city.trim() || null,
-          state: stateName.trim() || null,
-          latitude: coords?.latitude ?? null,
-          longitude: coords?.longitude ?? null,
-          instagram_url: instagram.trim() || null,
-          accepts_walk_ins: acceptsWalkIns,
-          onboarding_completed: true,
-        });
+      const proPayload: any = {
+        profile_id: profile.id,
+        business_name: businessName.trim() || null,
+        category: category as any,
+        business_type: businessType as any,
+        specialties,
+        years_experience: parseInt(yearsExperience) || 0,
+        shop_name: shopName.trim() || null,
+        address: rawAddress || null,
+        city: cityT || null,
+        state: stateT || null,
+        zip_code: zipT || null,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+        location_status: locationStatus,
+        instagram_url: instagram.trim() || null,
+        accepts_walk_ins: acceptsWalkIns,
+        onboarding_completed: true,
+      };
+
+      if (existingPro) {
+        const { error } = await supabase
+          .from("professional_profiles")
+          .update(proPayload)
+          .eq("id", existingPro.id);
+        if (error) {
+          console.error("Pro profile update failed:", error);
+          toast.error(`Could not save pro profile: ${error.message}`);
+          setLoading(false);
+          return;
+        }
+      } else {
+        const { error } = await supabase.from("professional_profiles").insert(proPayload);
         if (error) {
           console.error("Pro profile insert failed:", error);
           toast.error(`Could not create pro profile: ${error.message}`);
+          setLoading(false);
           return;
         }
       }
 
       await refreshProfile();
+      if (coords) {
+        toast.success("You're all set!");
+      } else {
+        toast.success("Profile created. We couldn't confirm your map location yet — you can update it later from profile settings.");
+      }
       setDone(true);
       setTimeout(() => navigate("/pro/dashboard"), 1800);
     } catch (e: any) {
       console.error("Onboarding error:", e);
       toast.error(e?.message || "Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -241,6 +278,11 @@ export default function ProOnboarding() {
                   <Label>State</Label>
                   <Input value={stateName} onChange={e => setStateName(e.target.value)} className="rounded-xl" placeholder="NY" />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>ZIP code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Input value={zipCode} onChange={e => setZipCode(e.target.value)} className="rounded-xl" placeholder="11201" inputMode="numeric" />
               </div>
 
               <div className="space-y-2">
